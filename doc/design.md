@@ -4,6 +4,8 @@ This project is done as a part of the Computer Science study program of Universi
 
 The programming language of choice is C. In addition to this I can use Java, C++, Haskell and Python. The project documentation is written in English
 
+The algorithms to be implemented are Huffman and Lempel-Ziv-Storer-Szymanski (LZSS).
+
 ## Data structures
 
 Huffman:
