@@ -1,6 +1,6 @@
 # Tiralabra 2023/LK
 
-A file compressor with two algorithms available: Huffman, Lempel-Ziv. Implemented in C. A software project done for the [Data Structures and Algorithms project course](https://tiralabra.github.io/2023_loppukesa/index) at University of Helsinki.
+A file compressor with two algorithms available: Huffman, Lempel-Ziv. Implemented in C. A software project done for the [Data Structures and Algorithms project course](https://tiralabra.github.io/2023_loppukesa/index) at University of Helsinki as part of the Computer Science study program (TKT).
 
 # Documentation links
 

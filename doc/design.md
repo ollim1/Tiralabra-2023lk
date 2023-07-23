@@ -8,15 +8,15 @@ The algorithms to be implemented are Huffman and Lempel-Ziv-Storer-Szymanski (LZ
 
 ## Data structures
 
-Huffman:
+Huffman: Huffman tree.
 
-Lempel-Ziv:
+Lempel-Ziv: Array.
 
 ## Time Complexity
 
-Huffman:
+Lempel-Ziv progresses linearily in the input with a fixed size window for compression, resulting in a time complexity of O($n$).
 
-Lempel-Ziv:
+Huffman uses a tree structure that is accessed on every character of input, leading to a time complexity of O($n$ log $n$).
 
 ## Input/Output
 
@@ -24,3 +24,4 @@ The program will use take input from binary or text files and stdin. The compres
 
 ## Sources
 [The Hitchhiker's Guide to Compression](https://go-compression.github.io/algorithms/huffman/)
+[An efficient LZW implementation](http://warp.povusers.org/EfficientLZW/)
