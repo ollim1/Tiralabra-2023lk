@@ -20,7 +20,7 @@ Huffman uses a tree structure that is accessed on every character of input, lead
 
 ## Input/Output
 
-The program will use take input from binary or text files and stdin. The compression and decompression algorithms to be used may be specified through command line flags. At least output to stdout will be implemented.
+The program will use take input from binary or text files and stdin. The compression and decompression algorithms to be used may be specified through command line flags. The program will output to stdout or a file.
 
 ## Sources
 [The Hitchhiker's Guide to Compression](https://go-compression.github.io/algorithms/huffman/)

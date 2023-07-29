@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-O2 -std=c11 -pedantic -Werror -Wall -fcommon
+CFLAGS=-O2 -std=c11 -pedantic -Werror -Wno-unused-variable -Wno-unused-but-set-variable -Wall -fcommon
 
 SRCDIR=./src
 SRCLIST=$(wildcard $(SRCDIR)/*.c)
@@ -16,7 +16,7 @@ compressor:
 	$(CC) $(CFLAGS) $(OBJLIST) -o compressor
 
 check:
-	$(CC) -O0 -o unittest tests/unit_tests.c $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS)
+	$(CC) -O0 -o unittest tests/unit_tests.c -lcheck $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS)
 	@./unittest
 
 codecov:
