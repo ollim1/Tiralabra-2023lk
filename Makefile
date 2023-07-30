@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-O2 -std=c11 -pedantic -Werror -Wno-unused-variable -Wno-unused-but-set-variable -Wall -fcommon
+CFLAGS=-O2 -std=c11 -pedantic -Werror -Wno-unused-variable -Wno-unused-but-set-variable -Wall -fcommon -g
 
 SRCDIR=./src
 SRCLIST=$(wildcard $(SRCDIR)/*.c)

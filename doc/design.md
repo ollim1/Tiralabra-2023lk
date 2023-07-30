@@ -8,7 +8,7 @@ The algorithms to be implemented are Huffman and Lempel-Ziv-Storer-Szymanski (LZ
 
 ## Data structures
 
-Huffman: Huffman tree.
+Huffman: Huffman tree. Implemented as a priority queue.
 
 Lempel-Ziv: Array.
 

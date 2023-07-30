@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <getopt.h>
 #include "fileread.h"
 #include "error.h"
 
@@ -22,11 +23,9 @@ int main(int argc, char **argv)
     while ((ch = getopt(argc, argv, "a:cei:o:")) != -1) {
         switch (ch) {
             case 'a':
-                if (strcmp(optarg, "huff") == 0) {
-                    fprintf(stderr, "compressing using huffman algorithm\n");
+                if (strcmp(optarg, "huffman") == 0 || strcmp(optarg, "huff") == 0) {
                     algorithm=HUFFMAN;
                 } else if (strcmp(optarg, "lzss") == 0) {
-                    fprintf(stderr, "compressing using lzss algorithm\n");
                     algorithm=LZSS;
                 } else
                     fprintf(stderr, "Unknown algorithm: %s\n", optarg);
@@ -60,8 +59,19 @@ int main(int argc, char **argv)
             err_quit("no mode set, exiting");
             break;
     }
+    switch (algorithm) {
+        case HUFFMAN:
+            fprintf(stderr, "using huffman algorithm\n");
+            break;
+        case LZSS:
+            fprintf(stderr, "using lzss algorithm\n");
+            break;
+        default:
+            break;
+    }
     fprintf(stderr, "writing to file %s\n", outfile);
     writeFile(data, outfile);
+    del_buffer(data);
 }
 
 void usage()
@@ -71,6 +81,6 @@ void usage()
     fprintf(stderr, "-e: extract (default huffman)\n");
     fprintf(stderr, "-c: compress (default huffman)\n");
     fprintf(stderr, "-i [infile]: set input file, - for stdin (default)\n");
-    fprintf(stderr, "-i [outfile]: set output file, - for stdout (default)\n");
+    fprintf(stderr, "-o [outfile]: set output file, - for stdout (default)\n");
     exit(EXIT_FAILURE);
 }
