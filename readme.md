@@ -8,5 +8,6 @@ A file compressor with two algorithms available: Huffman, Lempel-Ziv. Implemente
 
 ## Weekly reports
 ### [Week 1](doc/week1.md)
+### [Week 2](doc/week2.md)
 
 # Test coverage
