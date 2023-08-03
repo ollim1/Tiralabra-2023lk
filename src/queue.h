@@ -1,21 +1,29 @@
 #ifndef QUEUE_H
 #define QUEUE_H
+#include <sys/types.h>
+#include <stdlib.h>
+#include "error.h"
+#define MAX_LEAVES 256 // number of possible 8-bit values
 
-#include "buffer.h"
-typedef struct node_st TreeNode;
-struct node_st {
-    TreeNode *left;
-    TreeNode *right;
-    size_t key;
-    char value;
+typedef struct queuenode_st QueueNode;
+struct queuenode_st {
+    QueueNode *next;
+    void *data;
 };
-typedef struct tree_st {
-    TreeNode *root;
-} Tree;
+typedef struct priorityqueue_st {
+    /*
+     * Priority queue implemented as linked list
+     */
+    QueueNode *front;
+    int (*compare)(void *, void *);
+    ssize_t size;
+} PriorityQueue;
 
-void queue_push(Tree *, size_t, char);
-TreeNode queue_pop(Tree *);
-void delete_queue(Tree *);
-size_t queue_size(Tree *);
+PriorityQueue *new_queue(int (*)(void *, void *));
+void queue_insert(PriorityQueue *, void *);
+void *queue_pop(PriorityQueue *);
+void *queue_peek(PriorityQueue *);
+void delete_queue(PriorityQueue *);
+size_t queue_size(PriorityQueue *);
 
 #endif

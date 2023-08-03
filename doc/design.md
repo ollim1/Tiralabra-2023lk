@@ -16,7 +16,9 @@ Lempel-Ziv: Array.
 
 Lempel-Ziv progresses linearily in the input with a fixed size window for compression, resulting in a time complexity of O($n$).
 
-Huffman uses a tree structure that is accessed on every character of input, leading to a time complexity of O($n$ log $n$).
+Huffman uses a tree structure that is accessed on every character of input, seemingly leading to a time complexity of O($n$ log $n$).
+However, due to there being only 256 different possible byte values the tree size comes out to 256 leaves + 255 nodes = 511.
+This makes the algorithm's true time complexity O(n).
 
 ## Input/Output
 

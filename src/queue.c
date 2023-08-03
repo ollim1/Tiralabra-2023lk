@@ -1,16 +1,90 @@
 #include "queue.h"
-void queue_push(Tree *tree, size_t key, char value)
+
+PriorityQueue *new_queue(int (*compare)(void *, void *))
 {
-}
-TreeNode queue_pop(Tree *tree)
-{
-    return (TreeNode){0};
-}
-void delete_queue(Tree *tree)
-{
-}
-size_t queue_size(Tree *tree)
-{
-    return 0;
+    if (!compare)
+        err_quit("no comparator set for queue");
+
+    PriorityQueue *ret = malloc(sizeof(PriorityQueue));
+    if (!ret)
+        err_quit("could not allocate memory for priority queue init");
+    
+    ret->front = NULL;
+    ret->compare = compare;
+    ret->size = 0;
+    return ret;
 }
 
+void queue_insert(PriorityQueue *queue, void *data)
+{
+    if (!queue || !data)
+        err_quit("null pointer in queue insert arguments");
+
+    int (*compare)(void *, void *) = queue->compare;
+    QueueNode *new_node = malloc(sizeof(QueueNode));
+    if (!new_node)
+        err_quit("could not allocate memory for queue node");
+    new_node->next = NULL;
+    new_node->data = data;
+
+    QueueNode *prev = NULL;
+    QueueNode *cur = queue->front;
+    QueueNode *next = queue->front->next;
+    while (cur && compare(data, cur->data) < 0) {
+        // traverse list until first element that's smaller than or equal to data
+        prev = cur; 
+        cur = cur->next;
+    }
+    // if nodes have been traversed, there should be a previous node
+    if (prev)
+        prev->next = new_node;
+    else // otherwise place the new node at the front
+        queue->front = new_node;
+    new_node->next = next;
+    queue->size++;
+}
+
+void *queue_pop(PriorityQueue *queue)
+{
+    if (!queue)
+        err_quit("no queue to pop elements from");
+    if (queue->size < 1) {
+        err_quit("attempted to pop from an empty queue");
+    }
+    QueueNode *detached = queue->front;
+    queue->front = detached->next;
+    void *ret = detached->data;
+    queue->size--;
+    free(detached);
+    return ret;
+}
+
+void *queue_peek(PriorityQueue *queue)
+{
+    if (!queue)
+        err_quit("no queue to pop elements from");
+    if (queue->size < 1) {
+        err_quit("attempted to peek into an empty queue");
+    }
+    return queue->front->data;
+}
+
+void delete_queue(PriorityQueue *queue)
+{
+    if (!queue)
+        err_quit("no queue to delete");
+    QueueNode *cur = queue->front;
+    while (cur) {
+        QueueNode *prev = cur;
+        cur = cur->next;
+        free(prev);
+    }
+    free(queue);
+}
+
+size_t queue_size(PriorityQueue *queue)
+{
+    if (!queue)
+        err_quit("no queue");
+    return queue->size;
+}
