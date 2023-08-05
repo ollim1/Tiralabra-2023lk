@@ -50,8 +50,7 @@ void *queue_pop(PriorityQueue *queue)
         err_quit("no queue to pop elements from");
     if (queue->size < 1) {
         err_quit("attempted to pop from an empty queue");
-    }
-    else if (queue->front == NULL) {
+    } else if (queue->front == NULL) {
         err_quit("queue size inconsistent with contents");
     }
     QueueNode *detached = queue->front;

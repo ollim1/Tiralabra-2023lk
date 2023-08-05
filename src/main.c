@@ -19,11 +19,9 @@ int main(int argc, char **argv)
         case 'a':
             if (strcmp(optarg, "huffman") == 0 || strcmp(optarg, "huff") == 0) {
                 algorithm = HUFFMAN;
-            }
-            else if (strcmp(optarg, "lzss") == 0) {
+            } else if (strcmp(optarg, "lzss") == 0) {
                 algorithm = LZSS;
-            }
-            else
+            } else
                 fprintf(stderr, "Unknown algorithm: %s\n", optarg);
             break;
         case 'c':
