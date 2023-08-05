@@ -40,7 +40,7 @@ void writeFile(Buffer *src, char *filename)
     char *ptr = src->data; // use a pointer to move in the buffer
     char *endptr = src->data + src->len;
     while (ptr < endptr) {
-        ssize_t count = MIN(READBUF, endptr-ptr);
+        ssize_t count = MIN(READBUF, endptr - ptr);
         if (write(fd, ptr, count) < count) // progress READBUF bytes at a time
             err_quit("writing to file failed");
         ptr += READBUF;
@@ -48,4 +48,3 @@ void writeFile(Buffer *src, char *filename)
     if (fd > 2)
         close(fd);
 }
-

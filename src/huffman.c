@@ -1,12 +1,12 @@
 #include "huffman.h"
-#include "tree.h"
 #include "queue.h"
+#include "tree.h"
 
 void freqCount(Buffer *, size_t *);
-HuffNode *build_hufftree(size_t *, ssize_t );
+HuffNode *build_hufftree(size_t *, ssize_t);
 Buffer *huffman_compress(Buffer *src)
 {
-    /* 
+    /*
      * compresses a Buffer using the Huffman algorithm.
      * 1. frequency counting:
      * 2. tree building
@@ -17,7 +17,7 @@ Buffer *huffman_compress(Buffer *src)
     size_t freqs[MAX_LEAVES]; // frequency of every 8-bit integer value
     memset(freqs, 0, MAX_LEAVES * sizeof(size_t));
     freqCount(src, freqs);
-    
+
     build_hufftree(freqs, MAX_LEAVES);
     return NULL;
 }
@@ -25,7 +25,7 @@ Buffer *huffman_compress(Buffer *src)
 HuffNode *build_hufftree(size_t *freqs, ssize_t len)
 {
     PriorityQueue *queue = new_queue(huffnode_compare);
-    for (int i = 0; i < MAX_LEAVES-1; i++) {
+    for (int i = 0; i < MAX_LEAVES - 1; i++) {
         HuffNode *new_leaf = new_huffnode(NULL, NULL, freqs[i], i);
         queue_insert(queue, new_leaf);
     }
@@ -45,6 +45,6 @@ Buffer *huffman_extract(Buffer *src);
 void freqCount(Buffer *src, size_t *freqs)
 {
     for (size_t i = 0; i < src->len; i++) {
-        freqs[(int) src->data[i]]++;
+        freqs[(int)src->data[i]]++;
     }
 }

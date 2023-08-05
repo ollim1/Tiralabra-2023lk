@@ -1,8 +1,8 @@
 #ifndef QUEUE_H
 #define QUEUE_H
-#include <sys/types.h>
-#include <stdlib.h>
 #include "error.h"
+#include <stdlib.h>
+#include <sys/types.h>
 #define MAX_LEAVES 256 // number of possible 8-bit values
 
 typedef struct queuenode_st QueueNode;

@@ -5,7 +5,8 @@
 #include "../src/buffer.h"
 #include "../src/queue.h"
 
-START_TEST(test_buffer_init) {
+START_TEST(test_buffer_init)
+{
     Buffer *buf = new_buffer();
     ck_assert_ptr_nonnull(buf);
     ck_assert_ptr_nonnull(buf->data);
@@ -13,7 +14,8 @@ START_TEST(test_buffer_init) {
 }
 END_TEST
 
-START_TEST(test_buffer_stores_string) {
+START_TEST(test_buffer_stores_string)
+{
     Buffer *buf = new_buffer();
     char *testStr = "foo";
     size_t len = strlen(testStr) + 1;
@@ -22,7 +24,8 @@ START_TEST(test_buffer_stores_string) {
 }
 END_TEST
 
-START_TEST(test_buffer_append) {
+START_TEST(test_buffer_append)
+{
     Buffer *buf = new_buffer();
     char *testStr = "foo";
     buffer_append(buf, testStr, 3); // leaving out null pointer
@@ -32,7 +35,8 @@ START_TEST(test_buffer_append) {
 }
 END_TEST
 
-START_TEST(test_buffer_expands) {
+START_TEST(test_buffer_expands)
+{
     Buffer *buf = new_buffer();
     char testBuf[BUFSIZE * 2];
     buffer_append(buf, testBuf, BUFSIZE * 2); // leaving out null pointer
@@ -52,7 +56,7 @@ Suite *buffer_suite(void)
     tcase_add_test(tc_core, test_buffer_append);
     tcase_add_test(tc_core, test_buffer_expands);
     suite_add_tcase(s, tc_core);
-    
+
     return s;
 }
 
@@ -68,14 +72,16 @@ int test_comparator(void *a, void *b)
         return 0;
 }
 
-START_TEST(test_queue_init) {
+START_TEST(test_queue_init)
+{
     PriorityQueue *queue = new_queue(test_comparator);
 
     ck_assert_ptr_nonnull(queue);
 }
 END_TEST
 
-START_TEST(test_queue_insert_pop) {
+START_TEST(test_queue_insert_pop)
+{
     PriorityQueue *queue = new_queue(test_comparator);
 
     int a[5] = {1, 2, 3, 4, 5};
@@ -88,7 +94,8 @@ START_TEST(test_queue_insert_pop) {
 }
 END_TEST
 
-START_TEST(test_queue_is_sorted) {
+START_TEST(test_queue_is_sorted)
+{
     PriorityQueue *queue = new_queue(test_comparator);
 
     int a[5] = {15, 20, -12, 10, 1};

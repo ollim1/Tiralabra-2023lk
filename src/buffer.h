@@ -1,15 +1,15 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 #define BUFSIZE 4096
+#include "error.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "error.h"
 
 typedef struct buffer_st {
     size_t len;
     size_t size;
-    char *data; 
+    char *data;
 } Buffer;
 
 Buffer *new_buffer();

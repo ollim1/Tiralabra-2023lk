@@ -6,4 +6,3 @@
 Buffer *lzss_compress(Buffer *src);
 Buffer *lzss_extract(Buffer *src);
 #endif
-

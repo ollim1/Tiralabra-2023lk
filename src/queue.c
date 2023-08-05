@@ -8,7 +8,7 @@ PriorityQueue *new_queue(int (*compare)(void *, void *))
     PriorityQueue *ret = malloc(sizeof(PriorityQueue));
     if (!ret)
         err_quit("could not allocate memory for priority queue init");
-    
+
     ret->front = NULL;
     ret->compare = compare;
     ret->size = 0;
@@ -30,7 +30,8 @@ void queue_insert(PriorityQueue *queue, void *data)
     QueueNode *prev = NULL;
     QueueNode *temp = queue->front;
     while (temp && compare(data, temp->data) < 0) {
-        // traverse list until first element that's smaller than or equal to data
+        // traverse list until first element that's smaller than or equal
+        // to data
         prev = temp;
         temp = temp->next;
     }
@@ -49,7 +50,8 @@ void *queue_pop(PriorityQueue *queue)
         err_quit("no queue to pop elements from");
     if (queue->size < 1) {
         err_quit("attempted to pop from an empty queue");
-    } else if (queue->front == NULL) {
+    }
+    else if (queue->front == NULL) {
         err_quit("queue size inconsistent with contents");
     }
     QueueNode *detached = queue->front;
