@@ -2,17 +2,17 @@
 #define HUFFTREE_H
 
 #include "buffer.h"
-typedef struct huffnode_st HuffTreeNode;
+typedef struct huffnode_st HuffNode;
 struct huffnode_st {
-    HuffTreeNode *left;
-    HuffTreeNode *right;
+    HuffNode *left;
+    HuffNode *right;
     ssize_t key;
     char value;
 };
 
 int huffnode_compare(void *, void *);
-void delete_hufftree(HuffTreeNode *);
-HuffTreeNode *new_huffnode(HuffTreeNode *, HuffTreeNode *, ssize_t, char);
-int isLeaf(HuffTreeNode *);
+void delete_hufftree(HuffNode *);
+HuffNode *new_huffnode(HuffNode *, HuffNode *, ssize_t, char);
+int isLeaf(HuffNode *);
 
 #endif

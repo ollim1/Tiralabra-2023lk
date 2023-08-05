@@ -55,5 +55,11 @@ dkms.conf
 compressor
 unittest
 
+# gcov
+*.gcno
+*.gcda
+*.html
+coverage.css
+
 # Test files
 testfiles/

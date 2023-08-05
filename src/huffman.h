@@ -6,7 +6,7 @@
 #include <string.h>
 #include <sys/types.h>
 typedef struct huffbuf_st {
-    HuffTreeNode *tree;
+    HuffNode *tree;
     Buffer *data;
 } HuffBuffer;
 

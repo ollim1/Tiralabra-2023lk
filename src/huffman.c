@@ -3,7 +3,7 @@
 #include "queue.h"
 
 void freqCount(Buffer *, size_t *);
-HuffTreeNode *build_hufftree(size_t *, ssize_t );
+HuffNode *build_hufftree(size_t *, ssize_t );
 Buffer *huffman_compress(Buffer *src)
 {
     /* 
@@ -19,22 +19,23 @@ Buffer *huffman_compress(Buffer *src)
     freqCount(src, freqs);
     
     build_hufftree(freqs, MAX_LEAVES);
+    return NULL;
 }
 
-HuffTreeNode *build_hufftree(size_t *freqs, ssize_t len)
+HuffNode *build_hufftree(size_t *freqs, ssize_t len)
 {
     PriorityQueue *queue = new_queue(huffnode_compare);
     for (int i = 0; i < MAX_LEAVES-1; i++) {
-        HuffTreeNode *new_leaf = new_huffnode(NULL, NULL, freqs[i], i);
+        HuffNode *new_leaf = new_huffnode(NULL, NULL, freqs[i], i);
         queue_insert(queue, new_leaf);
     }
     while (queue_size(queue) > 1) {
-        HuffTreeNode *a = queue_pop(queue);
-        HuffTreeNode *b = queue_pop(queue);
-        HuffTreeNode *parent = new_huffnode(a, b, a->key + b->key, -1);
+        HuffNode *a = queue_pop(queue);
+        HuffNode *b = queue_pop(queue);
+        HuffNode *parent = new_huffnode(a, b, a->key + b->key, -1);
         queue_insert(queue, parent);
     }
-    HuffTreeNode *root = queue_pop(queue);
+    HuffNode *root = queue_pop(queue);
     delete_queue(queue);
     return root;
 }
