@@ -54,6 +54,7 @@ dkms.conf
 # Executables
 compressor
 unittest
+huffmantest
 
 # gcov
 *.gcno

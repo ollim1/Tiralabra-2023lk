@@ -37,7 +37,15 @@ HuffNode *new_huffnode(HuffNode *left, HuffNode *right, ssize_t key, char value)
     return ret;
 }
 
-int isLeaf(HuffNode *node)
+HuffNode *huffnode_createParent(HuffNode *left, HuffNode *right)
+{
+    if (!left || !right)
+        err_quit("can only create a parent node for two leaf nodes");
+    HuffNode *ret = new_huffnode(left, right, left->key + right->key, '\0');
+    return ret;
+}
+
+int huffnode_isLeaf(HuffNode *node)
 {
     if (!node)
         err_quit("null pointer checking if node is a leaf");

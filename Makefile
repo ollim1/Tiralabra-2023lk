@@ -19,12 +19,18 @@ check:
 	$(CC) -O0 -o unittest tests/unit_tests.c -g $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS)
 	@./unittest
 
+check-huffman: 
+	$(CC) -O0 -o huffmantest tests/huffman_tests.c -g $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS)
+	@./huffmantest
+
 codecov:
 	$(CC) -ftest-coverage -coverage -g -fprofile-arcs -O0 -o unittest tests/unit_tests.c $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS)
+	$(CC) -ftest-coverage -coverage -g -fprofile-arcs -O0 -o huffmantest tests/huffman_tests.c $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS)
 
 coverage-html: codecov
 	@./unittest
-	gcovr --exclude tests/ --exclude src/error.c --html-details coverage.html
+	@./huffmantest
+	gcovr --exclude tests/ --exclude src/error.c --exclude src/fileread.c --html-details coverage.html
 
 format:
 	@python ./format.py

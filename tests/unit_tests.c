@@ -85,7 +85,8 @@ START_TEST(test_queue_init)
 }
 END_TEST
 
-START_TEST(test_queue_insert_pop)
+
+START_TEST(test_queue_insert_peek)
 {
     PriorityQueue *queue = new_queue(test_comparator);
 
@@ -93,6 +94,18 @@ START_TEST(test_queue_insert_pop)
     for (int i = 0; i < 5; i++)
         queue_insert(queue, &(a[i]));
     ck_assert_int_gt(*(int *)queue_peek(queue), 0);
+
+    delete_queue(queue);
+}
+END_TEST
+
+START_TEST(test_queue_pop)
+{
+    PriorityQueue *queue = new_queue(test_comparator);
+
+    int a[5] = {1, 2, 3, 4, 5};
+    for (int i = 0; i < 5; i++)
+        queue_insert(queue, &(a[i]));
     for (int i = 0; i < 5; i++)
         queue_pop(queue);
     ck_assert_int_eq(queue_size(queue), 0);
@@ -124,7 +137,8 @@ Suite *priorityqueue_suite(void)
     s = suite_create("PriorityQueue");
     tc_core = tcase_create("Core");
     tcase_add_test(tc_core, test_queue_init);
-    tcase_add_test(tc_core, test_queue_insert_pop);
+    tcase_add_test(tc_core, test_queue_insert_peek);
+    tcase_add_test(tc_core, test_queue_pop);
     tcase_add_test(tc_core, test_queue_is_sorted);
     suite_add_tcase(s, tc_core);
 
