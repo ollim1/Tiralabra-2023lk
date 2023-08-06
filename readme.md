@@ -1,5 +1,6 @@
 # Tiralabra 2023/LK
 [![codecov](https://codecov.io/gh/ollim1/Tiralabra_2023lk/branch/main/graph/badge.svg?token=1M4X0W2FRS)](https://codecov.io/gh/ollim1/Tiralabra_2023lk)
+[![Tests](https://github.com/ollim1/Tiralabra_2023lk/actions/workflows/build.yml/badge.svg)](https://github.com/ollim1/Tiralabra_2023lk/actions/workflows/build.yml)
 
 A file compressor with two algorithms available: Huffman, Lempel-Ziv. Implemented in C. A software project done for the [Data Structures and Algorithms project course](https://tiralabra.github.io/2023_loppukesa/index) at University of Helsinki as part of the Computer Science study program (TKT).
 
