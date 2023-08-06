@@ -36,5 +36,5 @@ format:
 	@python ./format.py
 
 clean:
-	rm -f compressor $(OBJLIST) unittest *.gcda *.gcno *.gcov coverage.*
+	rm -f compressor unittest huffmantest $(OBJLIST) *.gcda *.gcno *.gcov coverage.*
 compressor: $(OBJLIST)
