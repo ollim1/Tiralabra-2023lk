@@ -1,0 +1,20 @@
+name: Codecov upload
+on: [push, pull_request]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install check
+        run: sudo apt-get install -y check gcovr
+      - name: Fetch
+        uses: actions/checkout@master
+      - name: Test
+        run: |
+          make codecov
+          ./unittest
+          ./huffmantest
+          gcov -abcfu *.gcno
+      - name: Upload
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
