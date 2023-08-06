@@ -16,7 +16,7 @@ compressor:
 	$(CC) $(CFLAGS) $(OBJLIST) -o compressor
 
 check:
-	$(CC) -O0 -o unittest tests/unit_tests.c $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS)
+	$(CC) -O0 -o unittest tests/unit_tests.c -g $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS)
 	@./unittest
 
 codecov:
