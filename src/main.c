@@ -68,7 +68,7 @@ int main(int argc, char **argv)
     }
     fprintf(stderr, "writing to file %s\n", outfile);
     writeFile(data, outfile);
-    del_buffer(data);
+    delete_buffer(data);
 }
 
 void usage()
