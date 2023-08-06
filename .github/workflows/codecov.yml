@@ -16,5 +16,7 @@ jobs:
           gcov -abcfu *.gcno
       - name: Upload
         uses: codecov/codecov-action@v3
+        ignore:
+          - tests/
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
