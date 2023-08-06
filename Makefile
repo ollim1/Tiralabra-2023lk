@@ -1,4 +1,5 @@
 CFLAGS=-O2 -std=c11 -Wno-strict-prototypes -pedantic -Wall -fcommon -g -D_POSIX_C_SOURCE=200809L
+CHECK_FLAGS := $(shell bash check_flags.sh)
 
 SRCDIR=./src
 SRCLIST=$(wildcard $(SRCDIR)/*.c)
@@ -15,11 +16,11 @@ compressor:
 	$(CC) $(CFLAGS) $(OBJLIST) -o compressor
 
 check:
-	$(CC) -O0 -o unittest tests/unit_tests.c $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS) -lcheck -lsubunit -lm
+	$(CC) -O0 -o unittest tests/unit_tests.c $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS)
 	@./unittest
 
 codecov:
-	$(CC) -ftest-coverage -coverage -g -fprofile-arcs -O0 -o unittest tests/unit_tests.c $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS) -lcheck -lgcov -lsubunit -lm
+	$(CC) -ftest-coverage -coverage -g -fprofile-arcs -O0 -o unittest tests/unit_tests.c $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS)
 
 coverage-html: codecov
 	@./unittest
