@@ -1,2 +1,5 @@
 ignore:
   - tests/**
+  - src/main.c
+  - src/fileread.c
+  - src/error.c
