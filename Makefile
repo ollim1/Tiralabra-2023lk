@@ -30,7 +30,7 @@ codecov:
 coverage-html: codecov
 	@./unittest
 	@./huffmantest
-	gcovr --exclude tests/ --exclude src/error.c --exclude src/fileread.c --html-details coverage.html
+	gcovr --exclude tests/ --exclude src/error.c --exclude src/fileread.c --exclude src/main.c --html-details coverage.html
 
 format:
 	@python ./format.py

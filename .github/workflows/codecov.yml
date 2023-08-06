@@ -12,6 +12,7 @@ jobs:
         run: |
           make codecov
           ./unittest
+          ./huffmantest
           gcov -abcfu *.gcno
       - name: Upload
         uses: codecov/codecov-action@v3
