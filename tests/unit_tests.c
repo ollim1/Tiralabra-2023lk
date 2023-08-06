@@ -109,10 +109,8 @@ START_TEST(test_queue_is_sorted)
     for (int i = 0; i < 5; i++)
         queue_insert(queue, &(a[i]));
     int sorted[5] = {20, 15, 10, 1, -12};
-    FILE *f = fopen("testfiles/testlog.txt", "w");
     for (int i = 0; i < 5; i++) {
         int temp = *(int *)queue_pop(queue);
-        fprintf(f, "%d\n", temp);
         ck_assert_int_eq(temp, sorted[i]);
     }
     delete_queue(queue);
