@@ -15,11 +15,11 @@ compressor:
 	$(CC) $(CFLAGS) $(OBJLIST) -o compressor
 
 check:
-	$(CC) -O0 -o unittest tests/unit_tests.c -lcheck -lsubunit $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS)
+	$(CC) -O0 -o unittest tests/unit_tests.c $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS) -lcheck -lsubunit -lm
 	@./unittest
 
 codecov:
-	$(CC) -ftest-coverage -coverage -g -fprofile-arcs -O0 -o unittest tests/unit_tests.c $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS) -lcheck -lgcov -lsubunit
+	$(CC) -ftest-coverage -coverage -g -fprofile-arcs -O0 -o unittest tests/unit_tests.c $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS) -lcheck -lgcov -lsubunit -lm
 
 coverage-html: codecov
 	@./unittest
