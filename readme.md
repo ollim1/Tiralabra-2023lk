@@ -36,3 +36,9 @@ Run `make coverage-html`. The report will be written to `coverage.html`
 
 ## Usage
 Running `compressor` with no arguments will cause usage information to be printed.
+```Usage:
+-a [algorithm]: compression algorithm; huff or lzss
+-e: extract (default huffman)
+-c: compress (default huffman)
+-i [infile]: set input file, - for stdin (default)
+-o [outfile]: set output file, - for stdout (default)```
