@@ -16,6 +16,6 @@ jobs:
       - name: Upload
         uses: codecov/codecov-action@v3
         with:
-          files: ./*.c.gcov
+          files: *.c.gcov
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
