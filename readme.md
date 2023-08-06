@@ -18,7 +18,7 @@ A file compressor with two algorithms available: Huffman, Lempel-Ziv. Implemente
 - Make
 - Check
 - `gcovr` on Linux for coverage reports (broken on Apple Silicon Macs)
-- Python for style checking
+- Python for auto-formatting
 
 ### Compilation
 To build the software, run `make` in the root directory of the repository. This produces the binary `compressor`, which can be run by executing `./compressor`.
@@ -27,4 +27,10 @@ To build the software, run `make` in the root directory of the repository. This 
 Unit tests are set up in the make file under the command `make check`.
 
 ### Code formatting
+Code auto-formatting can be applied with `make format`. This requires `clang-format` and `python` to be installed (Debian-based systems may need `python-is-python3`).
 
+### Code coverage
+Run `make coverage-html`. The report will be written to `coverage.html`
+
+## Usage
+Running `compressor` with no arguments will cause usage information to be printed.

@@ -1,6 +1,11 @@
 # Week 2
 
-- implement Huffman algorithm
+- implement priority queue for Huffman algorithm
+- work on Huffman algorithm
+- work on unit tests
+- add code coverage
+- add auto-formatting
+- add testing document
 
 ## Work Hours
 | Date  | Time Spent |

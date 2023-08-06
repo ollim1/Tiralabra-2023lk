@@ -58,6 +58,7 @@ unittest
 # gcov
 *.gcno
 *.gcda
+*.gcov
 *.html
 coverage.css
 

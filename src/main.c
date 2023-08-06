@@ -14,6 +14,9 @@ int main(int argc, char **argv)
     char *infile = "-", *outfile = "-";
     enum algorithm { HUFFMAN = 0, LZSS } algorithm = HUFFMAN;
     enum mode { COMPRESS = 0, EXTRACT } mode = COMPRESS;
+    if (argc == 1)
+        usage();
+
     while ((ch = getopt(argc, argv, "a:cei:o:")) != -1) {
         switch (ch) {
         case 'a':
