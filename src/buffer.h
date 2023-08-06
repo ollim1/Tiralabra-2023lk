@@ -13,7 +13,7 @@ typedef struct buffer_st {
 } Buffer;
 
 Buffer *new_buffer();
-void del_buffer(Buffer *);
+void delete_buffer(Buffer *);
 
 void buffer_append(Buffer *, char *, size_t);
 

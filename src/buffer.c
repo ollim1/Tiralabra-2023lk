@@ -14,7 +14,7 @@ Buffer *new_buffer()
     return ret;
 }
 
-void del_buffer(Buffer *buf)
+void delete_buffer(Buffer *buf)
 {
     if (buf) {
         if (buf->data)

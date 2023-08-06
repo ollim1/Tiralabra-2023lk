@@ -11,6 +11,7 @@ START_TEST(test_buffer_init)
     ck_assert_ptr_nonnull(buf);
     ck_assert_ptr_nonnull(buf->data);
     ck_assert_int_eq(buf->len, 0);
+    delete_buffer(buf);
 }
 END_TEST
 
@@ -21,6 +22,7 @@ START_TEST(test_buffer_stores_string)
     size_t len = strlen(testStr) + 1;
     buffer_append(buf, testStr, len);
     ck_assert_str_eq(buf->data, testStr);
+    delete_buffer(buf);
 }
 END_TEST
 
@@ -32,6 +34,7 @@ START_TEST(test_buffer_append)
     buffer_append(buf, testStr, 4);
     ck_assert_str_eq(buf->data, "foofoo");
     ck_assert_int_eq(buf->len, 7);
+    delete_buffer(buf);
 }
 END_TEST
 
@@ -42,6 +45,7 @@ START_TEST(test_buffer_expands)
     buffer_append(buf, testBuf, BUFSIZE * 2); // leaving out null pointer
     ck_assert_int_gt(buf->len, BUFSIZE);
     ck_assert_int_gt(buf->len, BUFSIZE);
+    delete_buffer(buf);
 }
 END_TEST
 
@@ -77,6 +81,7 @@ START_TEST(test_queue_init)
     PriorityQueue *queue = new_queue(test_comparator);
 
     ck_assert_ptr_nonnull(queue);
+    delete_queue(queue);
 }
 END_TEST
 
@@ -91,6 +96,8 @@ START_TEST(test_queue_insert_pop)
     for (int i = 0; i < 5; i++)
         queue_pop(queue);
     ck_assert_int_eq(queue_size(queue), 0);
+
+    delete_queue(queue);
 }
 END_TEST
 
@@ -108,6 +115,7 @@ START_TEST(test_queue_is_sorted)
         fprintf(f, "%d\n", temp);
         ck_assert_int_eq(temp, sorted[i]);
     }
+    delete_queue(queue);
 }
 END_TEST
 
