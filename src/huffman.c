@@ -3,7 +3,7 @@
 #include "tree.h"
 
 void freqCount(Buffer *, size_t *);
-HuffNode *build_hufftree(size_t *, ssize_t);
+HuffNode *build_hufftree(size_t *, size_t);
 Buffer *huffman_compress(Buffer *src)
 {
     /*
@@ -22,7 +22,7 @@ Buffer *huffman_compress(Buffer *src)
     return NULL;
 }
 
-HuffNode *build_hufftree(size_t *freqs, ssize_t len)
+HuffNode *build_hufftree(size_t *freqs, size_t len)
 {
     PriorityQueue *queue = new_queue(huffnode_compare);
     for (int i = 0; i < MAX_LEAVES - 1; i++) {

@@ -4,6 +4,9 @@ void buffer_resize(Buffer *buf, size_t new_size);
 
 Buffer *new_buffer()
 {
+    /*
+     * create an empty buffer with a BUFSIZE initial size
+     */
     Buffer *ret = malloc(sizeof(Buffer));
     char *data = malloc(BUFSIZE);
     if (!ret || !data)
@@ -16,11 +19,33 @@ Buffer *new_buffer()
 
 void delete_buffer(Buffer *buf)
 {
+    /*
+     * delete buffer, ignoring any any pointers contained within its elements
+     */
     if (buf) {
         if (buf->data)
             free(buf->data);
         free(buf);
     }
+}
+
+void buffer_pad(Buffer *buf, size_t len)
+{
+    /*
+     * pad buffer with len zeroes
+     */
+    if (!buf)
+        err_quit("null pointer when resizing buffer");
+
+    size_t newSize = buf->size;
+    while (buf->len + len > newSize)
+        newSize *= 2;
+
+    if (newSize > buf->size) {
+        buffer_resize(buf, newSize);
+    }
+    memset(buf->data + buf->len, 0, len);
+    buf->len += len;
 }
 
 void buffer_append(Buffer *dest, char *src, size_t len)

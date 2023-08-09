@@ -85,7 +85,6 @@ START_TEST(test_queue_init)
 }
 END_TEST
 
-
 START_TEST(test_queue_insert_peek)
 {
     PriorityQueue *queue = new_queue(test_comparator);
