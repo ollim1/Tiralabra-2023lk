@@ -34,7 +34,7 @@ void bitarray_set(BitArray *ba, int val, size_t pos)
     size_t byte = pos / 8;
     size_t offset = pos % 8;
 
-    ba->data->data[byte] &= ~(1 << offset); // clear bit for writing
+    ba->data->data[byte] &= ~(1 << offset);  // clear bit for writing
     ba->data->data[byte] |= (bit << offset); // set bit value
 }
 
@@ -44,8 +44,8 @@ void bitarray_append(BitArray *ba, int val)
         err_quit("null pointer when appending BitArray bit");
     if (ba->len % 8 == 0)
         buffer_pad(ba->data, 1);
-    
-    ba->len += 1;
+
+    ba->len++;
     bitarray_set(ba, val, ba->len - 1);
 }
 
@@ -60,7 +60,8 @@ void bitarray_appendString(BitArray *dst, char *src, size_t len)
     for (size_t i = 0; i < len; i++) {
         int byte = i / 8;
         int offset = i % 8;
-        bitarray_append(dst, src[byte] & ((1 << offset) > 0));
+        char bit = (src[byte] & (1 << offset)) > 0;
+        bitarray_append(dst, bit);
     }
 }
 
@@ -81,6 +82,9 @@ int bitarray_get(BitArray *ba, size_t pos)
 
 void bitarray_pad(BitArray *ba, size_t len)
 {
+    /*
+     * pad BitArray by len bits
+     */
     if (!ba)
         err_quit("null pointer when padding BitArray");
 

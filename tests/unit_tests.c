@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../src/bitarray.h"
 #include "../src/buffer.h"
 #include "../src/queue.h"
-#include "../src/bitarray.h"
 
 START_TEST(test_buffer_init)
 {
@@ -195,7 +195,6 @@ START_TEST(test_bitarray_append)
     bitarray_append(ba, 1);
     bitarray_append(ba, 0);
 
-
     ck_assert_int_eq(bitarray_get(ba, 0), 1);
     ck_assert_int_eq(bitarray_get(ba, 1), 0);
     ck_assert_int_eq(bitarray_get(ba, 2), 1);
@@ -209,10 +208,10 @@ START_TEST(test_bitarray_appendstring)
 {
     BitArray *ba = new_bitarray();
 
-    char *test = "a";
-    bitarray_appendString(ba, test, 8);
+    char *test = "abc";
+    bitarray_appendString(ba, test, 32);
 
-    for (int i = 0; i < 24; i++) {
+    for (int i = 0; i < 32; i++) {
         int result = bitarray_get(ba, i);
         int expected = (test[i / 8] & (1 << (i % 8))) > 0;
         ck_assert_int_eq(result, expected);
