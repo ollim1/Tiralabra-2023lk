@@ -4,6 +4,7 @@
 
 #include "../src/buffer.h"
 #include "../src/queue.h"
+#include "../src/bitarray.h"
 
 START_TEST(test_buffer_init)
 {
@@ -38,6 +39,15 @@ START_TEST(test_buffer_append)
 }
 END_TEST
 
+START_TEST(test_buffer_pad)
+{
+    Buffer *buf = new_buffer();
+    buffer_pad(buf, BUFSIZE * 2);
+    ck_assert_int_eq(buf->len, BUFSIZE * 2);
+    delete_buffer(buf);
+}
+END_TEST
+
 START_TEST(test_buffer_expands)
 {
     Buffer *buf = new_buffer();
@@ -58,6 +68,7 @@ Suite *buffer_suite(void)
     tcase_add_test(tc_core, test_buffer_init);
     tcase_add_test(tc_core, test_buffer_stores_string);
     tcase_add_test(tc_core, test_buffer_append);
+    tcase_add_test(tc_core, test_buffer_pad);
     tcase_add_test(tc_core, test_buffer_expands);
     suite_add_tcase(s, tc_core);
 
@@ -144,17 +155,99 @@ Suite *priorityqueue_suite(void)
     return s;
 }
 
+START_TEST(test_bitarray_init)
+{
+    BitArray *ba = new_bitarray();
+
+    ck_assert_ptr_nonnull(ba);
+    ck_assert_ptr_nonnull(ba->data);
+    ck_assert_int_eq(ba->len, 0);
+
+    delete_bitarray(ba);
+}
+END_TEST
+
+START_TEST(test_bitarray_set_get)
+{
+    BitArray *ba = new_bitarray();
+
+    bitarray_pad(ba, 100);
+    bitarray_set(ba, 1, 0);
+    bitarray_set(ba, 1, 14);
+    bitarray_set(ba, 0, 15);
+    bitarray_set(ba, 1, 16);
+
+    ck_assert_int_eq(bitarray_get(ba, 0), 1);
+    ck_assert_int_eq(bitarray_get(ba, 14), 1);
+    ck_assert_int_eq(bitarray_get(ba, 15), 0);
+    ck_assert_int_eq(bitarray_get(ba, 16), 1);
+
+    delete_bitarray(ba);
+}
+END_TEST
+
+START_TEST(test_bitarray_append)
+{
+    BitArray *ba = new_bitarray();
+
+    bitarray_append(ba, 1);
+    bitarray_append(ba, 0);
+    bitarray_append(ba, 1);
+    bitarray_append(ba, 0);
+
+
+    ck_assert_int_eq(bitarray_get(ba, 0), 1);
+    ck_assert_int_eq(bitarray_get(ba, 1), 0);
+    ck_assert_int_eq(bitarray_get(ba, 2), 1);
+    ck_assert_int_eq(bitarray_get(ba, 3), 0);
+
+    delete_bitarray(ba);
+}
+END_TEST
+
+START_TEST(test_bitarray_appendstring)
+{
+    BitArray *ba = new_bitarray();
+
+    char *test = "a";
+    bitarray_appendString(ba, test, 8);
+
+    for (int i = 0; i < 24; i++) {
+        int result = bitarray_get(ba, i);
+        int expected = (test[i / 8] & (1 << (i % 8))) > 0;
+        ck_assert_int_eq(result, expected);
+    }
+
+    delete_bitarray(ba);
+}
+END_TEST
+
+Suite *bitarray_suite(void)
+{
+    Suite *s;
+    TCase *tc_core;
+    s = suite_create("BitArray");
+    tc_core = tcase_create("Core");
+
+    tcase_add_test(tc_core, test_bitarray_init);
+    tcase_add_test(tc_core, test_bitarray_set_get);
+    tcase_add_test(tc_core, test_bitarray_append);
+    tcase_add_test(tc_core, test_bitarray_appendstring);
+    suite_add_tcase(s, tc_core);
+    return s;
+}
+
 int main(void)
 {
     int number_failed;
-    Suite *buffer;
-    Suite *queue;
+    Suite *buffer = buffer_suite();
+    Suite *queue = priorityqueue_suite();
+    Suite *bitarray = bitarray_suite();
     SRunner *sr;
 
-    buffer = buffer_suite();
-    queue = priorityqueue_suite();
     sr = srunner_create(buffer);
     srunner_add_suite(sr, queue);
+    srunner_add_suite(sr, bitarray);
 
     srunner_run_all(sr, CK_VERBOSE);
     number_failed = srunner_ntests_failed(sr);

@@ -1,4 +1,4 @@
-# Week 2
+# Week 3
 
 - implement priority queue for Huffman algorithm
 - work on Huffman algorithm

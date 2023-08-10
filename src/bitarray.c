@@ -30,25 +30,38 @@ void bitarray_set(BitArray *ba, int val, size_t pos)
     if (pos >= ba->len)
         err_quit("tried to set bit outside BitArray bounds");
 
-    int bit = val > 0; // normalize val to 1
+    char bit = val > 0; // normalize val to 1
     size_t byte = pos / 8;
     size_t offset = pos % 8;
-    char destVal = ba->data->data[byte];
-    destVal &= ~(1 << offset); // clear bit for writing
-    destVal |= (bit << offset); // set bit value
-    ba->data->data[byte] = destVal; // write back to Buffer
+
+    ba->data->data[byte] &= ~(1 << offset); // clear bit for writing
+    ba->data->data[byte] |= (bit << offset); // set bit value
 }
 
 void bitarray_append(BitArray *ba, int val)
 {
     if (!ba)
         err_quit("null pointer when appending BitArray bit");
-    if (ba->len % 8 == 0) {
-        bitarray_pad(ba, 1);
-    }
+    if (ba->len % 8 == 0)
+        buffer_pad(ba->data, 1);
     
-    bitarray_set(ba, val, ba->len);
     ba->len += 1;
+    bitarray_set(ba, val, ba->len - 1);
+}
+
+void bitarray_appendString(BitArray *dst, char *src, size_t len)
+{
+    /*
+     * append a string of bits to BitArray
+     */
+    if (!dst)
+        err_quit("null pointer when appending bit string to BitArray");
+
+    for (size_t i = 0; i < len; i++) {
+        int byte = i / 8;
+        int offset = i % 8;
+        bitarray_append(dst, src[byte] & ((1 << offset) > 0));
+    }
 }
 
 int bitarray_get(BitArray *ba, size_t pos)
@@ -63,12 +76,14 @@ int bitarray_get(BitArray *ba, size_t pos)
 
     size_t byte = pos / 8;
     size_t offset = pos % 8;
-    return (ba->data->data[pos] & (1 << offset)) > 0;
+    return (ba->data->data[byte] & (1 << offset)) > 0;
 }
 
-void bitarray_appendString(BitArray *dst, char *src, size_t len)
+void bitarray_pad(BitArray *ba, size_t len)
 {
-    if (!dst)
-        err_quit("null pointer when appending bit string to BitArray");
+    if (!ba)
+        err_quit("null pointer when padding BitArray");
+
+    buffer_pad(ba->data, len / 8 + 1);
+    ba->len += len;
 }
-void bitarray_pad(BitArray *, size_t);

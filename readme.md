@@ -13,6 +13,7 @@ A file compressor with two algorithms available: Huffman, Lempel-Ziv. Implemente
 ### [Week 1](doc/week1.md)
 ### [Week 2](doc/week2.md)
 ### [Week 3](doc/week3.md)
+### [Week 4](doc/week4.md)
 
 ## How to build
 ### Requirements
