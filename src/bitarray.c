@@ -65,6 +65,21 @@ void bitarray_appendString(BitArray *dst, char *src, size_t len)
     }
 }
 
+void bitarray_setString(BitArray *dst, char *src, size_t len, size_t pos)
+{
+    /*
+     * append a string of bits to BitArray
+     */
+    if (!dst)
+        err_quit("null pointer when appending bit string to BitArray");
+
+    for (size_t i = 0; i < len; i++) {
+        int byte = i / 8;
+        int offset = i % 8;
+        char bit = (src[byte] & (1 << offset)) > 0;
+        bitarray_set(dst, bit, pos++);
+    }
+}
 int bitarray_get(BitArray *ba, size_t pos)
 {
     /*

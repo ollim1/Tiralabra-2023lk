@@ -1,8 +1,10 @@
-# Tiralabra 2023/LK
+# Tiralabra 2023/II
 [![codecov](https://codecov.io/gh/ollim1/Tiralabra_2023lk/branch/main/graph/badge.svg?token=1M4X0W2FRS)](https://codecov.io/gh/ollim1/Tiralabra_2023lk)
-[![Tests](https://github.com/ollim1/Tiralabra_2023lk/actions/workflows/build.yml/badge.svg)](https://github.com/ollim1/Tiralabra_2023lk/actions/workflows/build.yml)
+[![Test](https://github.com/ollim1/Tiralabra_2023lk/actions/workflows/test.yml/badge.svg)](https://github.com/ollim1/Tiralabra_2023lk/actions/workflows/test.yml)
 
-A file compressor with two algorithms available: Huffman, Lempel-Ziv. Implemented in C. A software project done for the [Data Structures and Algorithms project course](https://tiralabra.github.io/2023_loppukesa/index) at University of Helsinki as part of the Computer Science study program (TKT).
+A file compressor with two algorithms available: Huffman, Lempel-Ziv (LZSS). Implemented in C. A software project done for the [Algorithms and AI lab course](https://tiralabra.github.io/2023_loppukesa/index) at University of Helsinki as part of the Computer Science study program (TKT).
+
+Continued from 2023/LK.
 
 ## Documentation links
 
@@ -14,6 +16,7 @@ A file compressor with two algorithms available: Huffman, Lempel-Ziv. Implemente
 ### [Week 2](doc/week2.md)
 ### [Week 3](doc/week3.md)
 ### [Week 4](doc/week4.md)
+### [Week 5](doc/week5.md)
 
 ## How to build
 ### Requirements

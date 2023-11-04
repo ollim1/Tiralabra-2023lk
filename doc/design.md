@@ -8,9 +8,13 @@ The algorithms to be implemented are Huffman and Lempel-Ziv-Storer-Szymanski (LZ
 
 ## Data structures
 
-Huffman: Huffman tree. Implemented as a priority queue.
+### Huffman
+The Huffman tree is implemented as a binary tree. This tree is serialized by sorting tree traversals alphabetically and then storing them along with their lengths at the beginning of the file.
 
-Lempel-Ziv: Array.
+A priority queue implemented as a linked list is used for sorting Huffman nodes and tree traversals.
+
+### Lempel-Ziv
+Array.
 
 ## Time Complexity
 

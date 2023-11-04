@@ -13,6 +13,7 @@ struct queuenode_st {
 typedef struct priorityqueue_st {
     /*
      * Priority queue implemented as linked list
+     * biggest element first by default, so works as a max heap
      */
     QueueNode *front;
     int (*compare)(void *, void *);

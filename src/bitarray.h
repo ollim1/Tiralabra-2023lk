@@ -17,6 +17,7 @@ void delete_bitarray(BitArray *);
 void bitarray_set(BitArray *, int, size_t);
 void bitarray_append(BitArray *, int);
 void bitarray_appendString(BitArray *, char *, size_t len);
+void bitarray_setString(BitArray *, char *, size_t len, size_t pos);
 void bitarray_pad(BitArray *, size_t);
 int bitarray_get(BitArray *, size_t);
 #endif

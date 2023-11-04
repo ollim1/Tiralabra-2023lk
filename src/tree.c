@@ -3,14 +3,14 @@ int huffnode_compare(void *left, void *right)
 {
     /*
      * comparator function for Huffman tree node
-     * returns positive if the left operand is larger than the right operand
+     * returns positive if the left operand is smaller than the right operand
      */
     if (!left || !right)
         err_quit("comparing null pointers");
     HuffNode *a = (HuffNode *)left;
     HuffNode *b = (HuffNode *)right;
 
-    return a->key - b->key;
+    return b->key - a->key;
 }
 
 void delete_hufftree(HuffNode *node)

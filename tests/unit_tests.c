@@ -221,6 +221,18 @@ START_TEST(test_bitarray_appendstring)
 }
 END_TEST
 
+START_TEST(test_bitarray_appendZeroLength)
+{
+    BitArray *ba = new_bitarray();
+
+    char *test = "";
+    bitarray_appendString(ba, test, 0);
+    ck_assert_int_eq(ba->len, 0);
+
+    delete_bitarray(ba);
+}
+END_TEST
+
 Suite *bitarray_suite(void)
 {
     Suite *s;
@@ -232,6 +244,7 @@ Suite *bitarray_suite(void)
     tcase_add_test(tc_core, test_bitarray_set_get);
     tcase_add_test(tc_core, test_bitarray_append);
     tcase_add_test(tc_core, test_bitarray_appendstring);
+    tcase_add_test(tc_core, test_bitarray_appendZeroLength);
     suite_add_tcase(s, tc_core);
     return s;
 }

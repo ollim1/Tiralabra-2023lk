@@ -65,3 +65,6 @@ coverage.css
 
 # Test files
 testfiles/
+
+# Cache files
+.ccls-cache/
