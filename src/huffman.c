@@ -11,10 +11,10 @@ Buffer *huffman_compress(Buffer *src)
     /*
      * compresses a Buffer using the Huffman algorithm.
      * 1. frequency counting:
-     * 2. tree building
+     * 2. tree building and encoding
+     *      - encode tree using depth first recursion:
+     *      b:(cccccccc) where b is the leaf bit and c are character bits
      * 3. character encoding
-     * - using 8-bit coding size, the frequency table and thus the tree will
-     *   contain at most 256 leaves and 255 internal nodes
      */
     size_t freqs[MAX_LEAVES]; // frequency of every 8-bit integer value
     memset(freqs, 0, MAX_LEAVES * sizeof(size_t));
@@ -29,10 +29,12 @@ Buffer *huffman_compress(Buffer *src)
     cache_huffcodes(tree, lengths, codes, 0, 0);
 
     // encoding input data using Huffman coded characters
-    BitArray *coded = new_bitarray();
+    BitArray *output = new_bitarray();
+    // first encode tree
+    huffnode_serialize(tree, output);
     for (size_t i = 0; i < src->len; i++) {
         int src_byte = src->data[i];
-        bitarray_appendString(coded, &codes[src_byte], lengths[src_byte]); 
+        bitarray_appendString(output, &codes[src_byte], lengths[src_byte]); 
     }
 
     // TODO: encoding and decoding Huffman tree into binary heap
@@ -49,13 +51,13 @@ HuffNode *build_hufftree(size_t *freqs, size_t len)
      */
     PriorityQueue *queue = new_queue(huffnode_compare);
     for (int i = 0; i < MAX_LEAVES - 1; i++) {
-        HuffNode *new_leaf = new_huffnode(NULL, NULL, freqs[i], i);
+        HuffNode *new_leaf = huffnode_createLeaf(freqs[i], i);
         queue_insert(queue, new_leaf);
     }
     while (queue_size(queue) > 1) {
         HuffNode *a = queue_pop(queue);
         HuffNode *b = queue_pop(queue);
-        HuffNode *parent = new_huffnode(a, b, a->key + b->key, -1);
+        HuffNode *parent = huffnode_createParent(a, b);
         queue_insert(queue, parent);
     }
     HuffNode *root = queue_pop(queue);

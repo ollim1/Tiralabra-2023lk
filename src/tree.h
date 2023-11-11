@@ -1,8 +1,9 @@
 #ifndef HUFFTREE_H
 #define HUFFTREE_H
 
+#include <sys/types.h>
 #include "buffer.h"
-#include "sys/types.h"
+#include "bitarray.h"
 typedef struct huffnode_st HuffNode;
 struct huffnode_st {
     HuffNode *left;
@@ -14,7 +15,10 @@ struct huffnode_st {
 int huffnode_compare(void *, void *);
 void delete_hufftree(HuffNode *);
 HuffNode *new_huffnode(HuffNode *, HuffNode *, ssize_t, char);
+HuffNode *huffnode_createLeaf(ssize_t key, char value);
 HuffNode *huffnode_createParent(HuffNode *, HuffNode *);
+void huffnode_serialize(HuffNode *node, BitArray *dst);
+HuffNode *huffnode_deserialize(BitArrayReader *src);
 int huffnode_isLeaf(HuffNode *);
 
 #endif
