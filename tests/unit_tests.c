@@ -6,6 +6,10 @@
 #include "../src/buffer.h"
 #include "../src/queue.h"
 
+/*
+ * Tests for utility libraries
+ */
+
 START_TEST(test_buffer_init)
 {
     Buffer *buf = new_buffer();
@@ -221,6 +225,19 @@ START_TEST(test_bitarray_appendstring)
 }
 END_TEST
 
+START_TEST(test_bitarray_set_get_byte)
+{
+    BitArray *ba = new_bitarray();
+
+    bitarray_appendByte(ba, 'a');
+
+    ck_assert_int_eq(ba->len, 8);
+    ck_assert_int_eq(bitarray_getByte(ba, 0), 'a');
+
+    delete_bitarray(ba);
+}
+END_TEST
+
 START_TEST(test_bitarray_appendZeroLength)
 {
     BitArray *ba = new_bitarray();
@@ -245,6 +262,7 @@ Suite *bitarray_suite(void)
     tcase_add_test(tc_core, test_bitarray_append);
     tcase_add_test(tc_core, test_bitarray_appendstring);
     tcase_add_test(tc_core, test_bitarray_appendZeroLength);
+    tcase_add_test(tc_core, test_bitarray_set_get_byte);
     suite_add_tcase(s, tc_core);
     return s;
 }

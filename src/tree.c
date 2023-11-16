@@ -66,7 +66,7 @@ void huffnode_serialize(HuffNode *node, BitArray *dst)
     /*
      * serialize tree into format:
      * if bit value is 1, the next 8 bits should contain a byte value
-     * otherwise next bit will contain the left child, then the right child
+     * otherwise next bit will be the beginning bit of the left child, then the right child
      */
     if (!node || !dst)
         err_quit("null pointer on serialize");

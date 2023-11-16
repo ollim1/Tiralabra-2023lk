@@ -37,7 +37,9 @@ Buffer *huffman_compress(Buffer *src)
         bitarray_appendString(output, &codes[src_byte], lengths[src_byte]); 
     }
 
-    // TODO: encoding and decoding Huffman tree into binary heap
+    /*
+     * Serializing Huffman tree
+     */
     return NULL;
 }
 

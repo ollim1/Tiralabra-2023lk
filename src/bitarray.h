@@ -29,4 +29,5 @@ void bitarray_appendString(BitArray *, char *, size_t len);
 void bitarray_setString(BitArray *, char *, size_t len, size_t pos);
 void bitarray_pad(BitArray *, size_t);
 int bitarray_get(BitArray *, size_t);
+char bitarray_getByte(BitArray *, size_t);
 #endif

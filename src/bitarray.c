@@ -21,6 +21,7 @@ void delete_bitarray(BitArray *ba)
     delete_buffer(ba->data);
     free(ba);
 }
+
 void bitarray_set(BitArray *ba, int val, size_t pos)
 {
     /*
@@ -59,9 +60,7 @@ void bitarray_appendByte(BitArray *dst, char byte)
         err_quit("null pointer when appending bit string to BitArray");
 
     for (size_t i = 0; i < 8; i++) {
-        int byte = i / 8;
-        int offset = i % 8;
-        char bit = (byte & (1 << offset)) > 0;
+        char bit = (byte & (1 << i)) > 0;
         bitarray_append(dst, bit);
     }
 }
@@ -113,6 +112,24 @@ int bitarray_get(BitArray *ba, size_t pos)
     return (ba->data->data[byte] & (1 << offset)) > 0;
 }
 
+char bitarray_getByte(BitArray *src, size_t pos)
+{
+    /*
+     * read an 8 bit sequence from BitArray
+     */
+    if (!src)
+        err_quit("null pointer when reading byte from BitArray");
+    if (pos + 8 > src->len)
+        err_quit("BitArray index out of bounds when reading byte");
+
+    char ret = 0;
+    for (size_t i = 0; i < 8; i++) {
+        int bit = bitarray_get(src, pos + i);
+        ret |= (bit << i);
+    }
+    return ret;
+}
+
 void bitarray_pad(BitArray *ba, size_t len)
 {
     /*
@@ -159,17 +176,11 @@ int bitarrayreader_readByte(BitArrayReader *br, char *dst)
      */
     if (!br || !dst)
         err_quit("null pointer accessing bitarrayreader");
-    if (br->pos + 7 >= br->data->len)
+    if (br->pos + 8 > br->data->len)
         return -1;
     
-    int temp = 0;
-    int offset = 0;
-    char ret = 0;
-    for (size_t i = br->pos; i < 8; i++) {
-        bitarrayreader_readBit(br, &temp);
-        ret |= (temp << offset);
-    }
-    *dst = ret;
+    *dst = bitarray_getByte(br->data, br->pos);
+    br->pos += 8;
     return 8;
 }
 
