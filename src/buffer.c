@@ -8,7 +8,7 @@ Buffer *new_buffer()
      * create an empty buffer with a BUFSIZE initial size
      */
     Buffer *ret = malloc(sizeof(Buffer));
-    char *data = malloc(BUFSIZE);
+    unsigned char *data = malloc(BUFSIZE);
     if (!ret || !data)
         err_quit("failed to allocate memory");
     ret->data = data;
@@ -27,6 +27,19 @@ void delete_buffer(Buffer *buf)
             free(buf->data);
         free(buf);
     }
+}
+
+Buffer *buffer_copy(Buffer *buf)
+{
+    /*
+     * duplicate a Buffer
+     */
+    if (!buf)
+        err_quit("null pointer duplicating buffer");
+
+    Buffer *ret = new_buffer();
+    buffer_append(ret, buf->data, buf->len);
+    return ret;
 }
 
 void buffer_pad(Buffer *buf, size_t len)
@@ -48,7 +61,7 @@ void buffer_pad(Buffer *buf, size_t len)
     buf->len += len;
 }
 
-void buffer_append(Buffer *dest, char *src, size_t len)
+void buffer_append(Buffer *dest, unsigned char *src, size_t len)
 {
     if (!dest || !src)
         err_quit("null pointer when appending to buffer");
@@ -69,7 +82,7 @@ void buffer_resize(Buffer *buf, size_t newSize)
     if (!buf)
         err_quit("cannot expand buffer: null pointer");
 
-    char *newData = realloc(buf->data, newSize);
+    unsigned char *newData = realloc(buf->data, newSize);
     if (!newData)
         err_quit("failed to allocate memory for appending to buffer");
     buf->data = newData;

@@ -13,13 +13,14 @@
 typedef struct buffer_st {
     size_t len;
     size_t size;
-    char *data;
+    unsigned char *data;
 } Buffer;
 
 Buffer *new_buffer();
 void delete_buffer(Buffer *);
 
+Buffer *buffer_copy(Buffer *buf);
 void buffer_pad(Buffer *buf, size_t len);
-void buffer_append(Buffer *, char *, size_t);
+void buffer_append(Buffer *, unsigned char *, size_t);
 
 #endif

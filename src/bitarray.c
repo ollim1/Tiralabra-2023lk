@@ -22,6 +22,57 @@ void delete_bitarray(BitArray *ba)
     free(ba);
 }
 
+BitArray *bitarray_copyl(BitArray *ba, size_t len)
+{
+    /*
+     * copy len bits from ba to a new BitArray
+     */
+    if (!ba)
+        err_quit("null pointer when setting BitArray bit");
+    if (len > ba->len)
+        err_quit("tried to copy more bits that source BitArray contains");
+
+    BitArray *ret = new_bitarray();
+    bitarray_append(ba, len);
+    return ret;
+}
+
+int bitarray_equals(BitArray *a, BitArray *b)
+{
+    if (!a || !b)
+        err_quit("null pointer when comparing BitArrays");
+
+    if (a->len != b->len)
+        return 0;
+    for (size_t i = 0; i < a->len; i++)
+        if (bitarray_get(a, i) != bitarray_get(b, 1))
+            return 0;
+    return 1;
+}
+
+Buffer *bitarray_toBuffer(BitArray *ba)
+{
+    /*
+     * return the buffer from a BitArray
+     * for now, just return the Buffer object directly
+     */
+    if (!ba)
+        err_quit("null pointer converting BitArray");
+
+    return buffer_copy(ba->data);
+}
+
+void bitarray_concat(BitArray *a, BitArray *b)
+{
+    /*
+     * concatenate BitArrays a and b
+     */
+    if (!a || !b)
+        err_quit("null pointer when concatenating BitArrays");
+    
+    bitarray_appendString(a, b->data->data, b->len);
+}
+
 void bitarray_set(BitArray *ba, int val, size_t pos)
 {
     /*
@@ -32,7 +83,7 @@ void bitarray_set(BitArray *ba, int val, size_t pos)
     if (pos >= ba->len)
         err_quit("tried to set bit outside BitArray bounds");
 
-    char bit = val > 0; // normalize val to 1
+    unsigned char bit = val > 0; // normalize val to 1
     size_t byte = pos / 8;
     size_t offset = pos % 8;
 
@@ -51,7 +102,7 @@ void bitarray_append(BitArray *ba, int val)
     bitarray_set(ba, val, ba->len - 1);
 }
 
-void bitarray_appendByte(BitArray *dst, char byte)
+void bitarray_appendByte(BitArray *dst, unsigned char byte)
 {
     /*
      * append a string of bits to BitArray
@@ -60,12 +111,12 @@ void bitarray_appendByte(BitArray *dst, char byte)
         err_quit("null pointer when appending bit string to BitArray");
 
     for (size_t i = 0; i < 8; i++) {
-        char bit = (byte & (1 << i)) > 0;
+        unsigned char bit = (byte & (1 << i)) > 0;
         bitarray_append(dst, bit);
     }
 }
 
-void bitarray_appendString(BitArray *dst, char *src, size_t len)
+void bitarray_appendString(BitArray *dst, unsigned char *src, size_t len)
 {
     /*
      * append a string of bits to BitArray
@@ -76,12 +127,12 @@ void bitarray_appendString(BitArray *dst, char *src, size_t len)
     for (size_t i = 0; i < len; i++) {
         int byte = i / 8;
         int offset = i % 8;
-        char bit = (src[byte] & (1 << offset)) > 0;
+        unsigned char bit = (src[byte] & (1 << offset)) > 0;
         bitarray_append(dst, bit);
     }
 }
 
-void bitarray_setString(BitArray *dst, char *src, size_t len, size_t pos)
+void bitarray_setString(BitArray *dst, unsigned char *src, size_t len, size_t pos)
 {
     /*
      * append a string of bits to BitArray
@@ -92,7 +143,7 @@ void bitarray_setString(BitArray *dst, char *src, size_t len, size_t pos)
     for (size_t i = 0; i < len; i++) {
         int byte = i / 8;
         int offset = i % 8;
-        char bit = (src[byte] & (1 << offset)) > 0;
+        unsigned char bit = (src[byte] & (1 << offset)) > 0;
         bitarray_set(dst, bit, pos++);
     }
 }
@@ -112,7 +163,7 @@ int bitarray_get(BitArray *ba, size_t pos)
     return (ba->data->data[byte] & (1 << offset)) > 0;
 }
 
-char bitarray_getByte(BitArray *src, size_t pos)
+unsigned char bitarray_getByte(BitArray *src, size_t pos)
 {
     /*
      * read an 8 bit sequence from BitArray
@@ -122,7 +173,7 @@ char bitarray_getByte(BitArray *src, size_t pos)
     if (pos + 8 > src->len)
         err_quit("BitArray index out of bounds when reading byte");
 
-    char ret = 0;
+    unsigned char ret = 0;
     for (size_t i = 0; i < 8; i++) {
         int bit = bitarray_get(src, pos + i);
         ret |= (bit << i);
@@ -167,10 +218,10 @@ int bitarrayreader_readBit(BitArrayReader *br, int *dst)
     return 1;
 }
 
-int bitarrayreader_readByte(BitArrayReader *br, char *dst)
+int bitarrayreader_readByte(BitArrayReader *br, unsigned char *dst)
 {
     /*
-     * iterate over bitarray, read 8 bits into a char
+     * iterate over bitarray, read 8 bits into an unsigned char
      * return -1 if position in reader struct is beyond bitarray length
      * otherwise return number of bits read (should be 8)
      */

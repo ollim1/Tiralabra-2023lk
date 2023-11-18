@@ -16,18 +16,18 @@ int huffnode_compare(void *left, void *right)
     return b->key - a->key;
 }
 
-void delete_hufftree(HuffNode *node)
+void delete_huffnode(HuffNode *node)
 {
     if (!node)
         err_quit("null pointer when trying to destroy tree");
     if (node->left)
-        delete_hufftree(node->left);
+        delete_huffnode(node->left);
     if (node->right)
-        delete_hufftree(node->right);
+        delete_huffnode(node->right);
     free(node);
 }
 
-HuffNode *new_huffnode(HuffNode *left, HuffNode *right, ssize_t key, char value)
+HuffNode *new_huffnode(HuffNode *left, HuffNode *right, ssize_t key, unsigned char value)
 {
     HuffNode *ret = malloc(sizeof(HuffNode));
     if (!ret)
@@ -40,7 +40,7 @@ HuffNode *new_huffnode(HuffNode *left, HuffNode *right, ssize_t key, char value)
     return ret;
 }
 
-HuffNode *huffnode_createLeaf(ssize_t key, char value)
+HuffNode *huffnode_createLeaf(ssize_t key, unsigned char value)
 {
     HuffNode *ret = new_huffnode(NULL, NULL, key, value);
     return ret;
@@ -89,12 +89,12 @@ HuffNode *huffnode_deserialize(BitArrayReader *src)
     int bit;
     bitarrayreader_readBit(src, &bit);
     if (bit) {
-        char byte;
+        unsigned char byte;
         bitarrayreader_readByte(src, &byte);
-        return new_huffnode(NULL, NULL, 0, byte);
+        return huffnode_createLeaf(0, byte);
     } else {
         HuffNode *left = huffnode_deserialize(src);
         HuffNode *right = huffnode_deserialize(src);
-        return new_huffnode(left, right, 0, 0);
+        return huffnode_createParent(left, right);
     }
 }

@@ -9,13 +9,13 @@ struct huffnode_st {
     HuffNode *left;
     HuffNode *right;
     ssize_t key;
-    char value;
+    unsigned char value;
 };
 
 int huffnode_compare(void *, void *);
-void delete_hufftree(HuffNode *);
-HuffNode *new_huffnode(HuffNode *, HuffNode *, ssize_t, char);
-HuffNode *huffnode_createLeaf(ssize_t key, char value);
+void delete_huffnode(HuffNode *);
+HuffNode *new_huffnode(HuffNode *, HuffNode *, ssize_t, unsigned char);
+HuffNode *huffnode_createLeaf(ssize_t key, unsigned char value);
 HuffNode *huffnode_createParent(HuffNode *, HuffNode *);
 void huffnode_serialize(HuffNode *node, BitArray *dst);
 HuffNode *huffnode_deserialize(BitArrayReader *src);
