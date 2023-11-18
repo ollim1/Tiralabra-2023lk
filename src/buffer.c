@@ -1,4 +1,5 @@
 #include "buffer.h"
+#include "ealloc.h"
 
 void buffer_resize(Buffer *buf, size_t new_size);
 
@@ -7,10 +8,8 @@ Buffer *new_buffer()
     /*
      * create an empty buffer with a BUFSIZE initial size
      */
-    Buffer *ret = malloc(sizeof(Buffer));
-    unsigned char *data = malloc(BUFSIZE);
-    if (!ret || !data)
-        err_quit("failed to allocate memory");
+    Buffer *ret = mmalloc(sizeof(Buffer));
+    unsigned char *data = mmalloc(BUFSIZE);
     ret->data = data;
     ret->size = BUFSIZE;
     ret->len = 0;
@@ -82,10 +81,7 @@ void buffer_resize(Buffer *buf, size_t newSize)
     if (!buf)
         err_quit("cannot expand buffer: null pointer");
 
-    unsigned char *newData = realloc(buf->data, newSize);
-    if (!newData)
-        err_quit("failed to allocate memory for appending to buffer");
+    unsigned char *newData = mrealloc(buf->data, newSize);
     buf->data = newData;
-
     buf->size = newSize;
 }

@@ -11,7 +11,7 @@ typedef struct bitarray_st {
     Buffer *data;
     size_t len;
 } BitArray;
-typedef struct bitwriter_st {
+typedef struct bitarrayreader_st {
     BitArray *data;
     size_t pos;
 } BitArrayReader;
@@ -20,8 +20,12 @@ BitArray *new_bitarray();
 void delete_bitarray(BitArray *);
 void bitarray_set(BitArray *, int, size_t);
 BitArray *bitarray_copyl(BitArray *, size_t);
+BitArray *new_bitarray_initl(char *code, size_t maxLen);
 Buffer *bitarray_toBuffer(BitArray *ba);
+BitArray *bitarray_fromBuffer(Buffer *src);
+int bitarray_equals(BitArray *a, BitArray *b);
 void bitarray_concat(BitArray *, BitArray *);
+void bitarray_concatl(BitArray *a, BitArray *b, size_t len);
 BitArrayReader *bitarray_createReader(BitArray *);
 int bitarrayreader_readBit(BitArrayReader *br, int *dst);
 int bitarrayreader_readByte(BitArrayReader *br, unsigned char *dst);

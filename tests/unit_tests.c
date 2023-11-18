@@ -1,6 +1,7 @@
 #include <check.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "../src/bitarray.h"
 #include "../src/buffer.h"
@@ -171,6 +172,20 @@ START_TEST(test_bitarray_init)
 }
 END_TEST
 
+START_TEST(test_bitarray_concat)
+{
+    BitArray *a = new_bitarray_initl("01011", 5);
+    BitArray *b = new_bitarray_initl("10011", 5);
+    BitArray *ab = new_bitarray_initl("0101110011", 10);
+
+    bitarray_concat(a, b);
+    ck_assert_int_eq(bitarray_equals(a, ab), 1);
+    delete_bitarray(a);
+    delete_bitarray(b);
+    delete_bitarray(ab);
+}
+END_TEST
+
 START_TEST(test_bitarray_set_get)
 {
     BitArray *ba = new_bitarray();
@@ -238,6 +253,15 @@ START_TEST(test_bitarray_set_get_byte)
 }
 END_TEST
 
+START_TEST(test_bitarray_toBuffer)
+{
+    BitArray *ba = new_bitarray();
+    bitarray_appendString(ba, (unsigned char *) "abc", 32);
+    Buffer *result = bitarray_toBuffer(ba);
+    ck_assert_int_eq(strncmp((unsigned char *)result->data, "abc", 4), 0);
+}
+END_TEST
+
 START_TEST(test_bitarray_appendZeroLength)
 {
     BitArray *ba = new_bitarray();
@@ -263,6 +287,8 @@ Suite *bitarray_suite(void)
     tcase_add_test(tc_core, test_bitarray_appendstring);
     tcase_add_test(tc_core, test_bitarray_appendZeroLength);
     tcase_add_test(tc_core, test_bitarray_set_get_byte);
+    tcase_add_test(tc_core, test_bitarray_concat);
+    tcase_add_test(tc_core, test_bitarray_toBuffer);
     suite_add_tcase(s, tc_core);
     return s;
 }

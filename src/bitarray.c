@@ -3,13 +3,26 @@
 
 BitArray *new_bitarray()
 {
-    BitArray *ret = malloc(sizeof(BitArray));
-    if (!ret)
-        err_quit("failed to allocate memory for BitArray");
+    BitArray *ret = mmalloc(sizeof(BitArray));
 
     Buffer *data = new_buffer();
     ret->data = data;
     ret->len = 0;
+    return ret;
+}
+
+BitArray *new_bitarray_initl(char *code, size_t maxLen)
+{
+    /*
+     * create BitArray and initialize it with code given as
+     * string consisting of ones and zeroes, limit size to maxLen
+     */
+    BitArray *ret = new_bitarray();
+    for (size_t i = 0; i < maxLen && code[i]; i++) {
+        if (code[i] != '0' && code[i] != '1')
+            err_quit("invalid format while initing BitArray");
+        bitarray_append(ret, code[i]);
+    }
     return ret;
 }
 
@@ -20,6 +33,20 @@ void delete_bitarray(BitArray *ba)
 
     delete_buffer(ba->data);
     free(ba);
+}
+
+BitArray *bitarray_fromBuffer(Buffer *src)
+{
+    /*
+     * turns a Buffer into a BitArray
+     */
+    if (!src)
+        err_quit("null pointer when converting Buffer to BitArray");
+
+    BitArray *ret = mmalloc(sizeof(BitArray));
+    ret->data = src;
+    ret->len = src->len * 8;
+    return ret;
 }
 
 BitArray *bitarray_copyl(BitArray *ba, size_t len)
@@ -33,7 +60,7 @@ BitArray *bitarray_copyl(BitArray *ba, size_t len)
         err_quit("tried to copy more bits that source BitArray contains");
 
     BitArray *ret = new_bitarray();
-    bitarray_append(ba, len);
+    bitarray_concatl(ret, ba, len);
     return ret;
 }
 
@@ -45,7 +72,7 @@ int bitarray_equals(BitArray *a, BitArray *b)
     if (a->len != b->len)
         return 0;
     for (size_t i = 0; i < a->len; i++)
-        if (bitarray_get(a, i) != bitarray_get(b, 1))
+        if (bitarray_get(a, i) != bitarray_get(b, i))
             return 0;
     return 1;
 }
@@ -70,7 +97,18 @@ void bitarray_concat(BitArray *a, BitArray *b)
     if (!a || !b)
         err_quit("null pointer when concatenating BitArrays");
     
-    bitarray_appendString(a, b->data->data, b->len);
+    bitarray_concatl(a, b, b->len);
+}
+
+void bitarray_concatl(BitArray *a, BitArray *b, size_t len)
+{
+    /*
+     * concatenate BitArrays a and b
+     */
+    if (!a || !b)
+        err_quit("null pointer when concatenating BitArrays");
+    
+    bitarray_appendString(a, b->data->data, (len < b->len ? len : b->len));
 }
 
 void bitarray_set(BitArray *ba, int val, size_t pos)
@@ -110,10 +148,7 @@ void bitarray_appendByte(BitArray *dst, unsigned char byte)
     if (!dst)
         err_quit("null pointer when appending bit string to BitArray");
 
-    for (size_t i = 0; i < 8; i++) {
-        unsigned char bit = (byte & (1 << i)) > 0;
-        bitarray_append(dst, bit);
-    }
+    bitarray_appendString(dst, &byte, 8);
 }
 
 void bitarray_appendString(BitArray *dst, unsigned char *src, size_t len)

@@ -4,8 +4,7 @@
 #include "bitarray.h"
 
 HuffNode *buildHufftree(Buffer *src);
-void cacheHuffcodes(HuffNode *, BitArray **, BitArray *, int length);
-void encodeData(Buffer *src, BitArray *dst, BitArray **codes);
+void encodePayload(Buffer *src, BitArray *dst, BitArray **codes);
 void encodeLength(BitArray *ba, size_t val);
 Buffer *huffman_compress(Buffer *src)
 {
@@ -23,10 +22,8 @@ Buffer *huffman_compress(Buffer *src)
     // storing codes into a lookup table
     unsigned char lengths[MAX_LEAVES] = {0}; // lengths of coded huffman tree items
     BitArray *codes[MAX_LEAVES] = {NULL}; // Huffman coded characters
-    BitArray *code = new_bitarray();
-    bitarray_pad(code, MAX_LEAVES);
+    char code[MAX_LEAVES + 1] = {'\0'};
     cacheHuffcodes(tree, codes, code, 0);
-    delete_bitarray(code);
 
     // encoding input data using Huffman coded characters
     BitArray *output = new_bitarray();
@@ -35,7 +32,7 @@ Buffer *huffman_compress(Buffer *src)
     // encode tree
     huffnode_serialize(tree, output);
     // encode payload
-    encodeData(src, output, codes);
+    encodePayload(src, output, codes);
 
     Buffer *ret = bitarray_toBuffer(output);
     delete_bitarray(output);
@@ -47,10 +44,10 @@ Buffer *huffman_compress(Buffer *src)
     return ret;
 }
 
-void encodeData(Buffer *src, BitArray *dst, BitArray **codes)
+void encodePayload(Buffer *src, BitArray *dst, BitArray **codes)
 {
     if (!src || !dst || !codes)
-        err_quit("null pointer in encodeData");
+        err_quit("null pointer in encodePayload");
     
     for (size_t i = 0; i < src->len; i++) {
         BitArray *traversal = codes[src->data[i]];
@@ -133,7 +130,7 @@ HuffNode *buildHufftree(Buffer *src)
     return root;
 }
 
-void cacheHuffcodes(HuffNode *node, BitArray **codes, BitArray *code, int depth)
+void cacheHuffcodes(HuffNode *node, BitArray **codes, char *code, int depth)
 {
     /*
      * cache Huffman tree nodes into easily searchable arrays for encoding
@@ -144,14 +141,54 @@ void cacheHuffcodes(HuffNode *node, BitArray **codes, BitArray *code, int depth)
         return;
 
     if (huffnode_isLeaf(node)) {
-        codes[node->value] = bitarray_copyl(code, depth);
+        codes[node->value] = new_bitarray_initl(code, depth);
         return;
     }
 
+    code[depth] = '0';
     cacheHuffcodes(node->left, codes, code, depth + 1);
-    bitarray_set(code, 1, depth);
+    code[depth] = '1';
     cacheHuffcodes(node->right, codes, code, depth + 1);
-    bitarray_set(code, 0, depth);
 }
 
-Buffer *huffman_extract(Buffer *src);
+Buffer *decodePayload(BitArrayReader *reader, HuffNode *tree, size_t decoded_length)
+{
+    if (!reader || !tree)
+        err_quit("null pointer when decoding data");
+    size_t total = 0;
+    int bit;
+    Buffer *output = new_buffer();
+    HuffNode *node = tree;
+    while (total < decoded_length) {
+        if (huffnode_isLeaf(node)) {
+            buffer_append(output, &(node->value), 1);
+            node = tree;
+            total++;
+        } else {
+            if (bitarrayreader_readBit(reader, &bit) < 1)
+                err_quit("unexpected end of file while reading payload");
+            if (bit == 1)
+                node = node->right;
+            else
+                node = node->left;
+        }
+    }
+    return output;
+}
+
+Buffer *huffman_extract(Buffer *src)
+{
+    // wrap Buffer in BitArray
+    BitArray *data = bitarray_fromBuffer(src);
+    // create reader for BitArray
+    BitArrayReader *reader = bitarray_createReader(data);
+    // decode uncompressed length
+    size_t decoded_length = decodeLength(reader);
+    // deserialize tree
+    HuffNode *tree = huffnode_deserialize(reader);
+    if (!huffnode_isValid(tree))
+        err_quit("invalid Huffman tree");
+    // decode Huffman coded payload
+    Buffer *ret = decodePayload(reader, tree, decoded_length);
+    return ret;
+}

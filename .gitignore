@@ -68,3 +68,6 @@ testfiles/
 
 # Cache files
 .ccls-cache/
+
+# gdb history
+.gdb_history

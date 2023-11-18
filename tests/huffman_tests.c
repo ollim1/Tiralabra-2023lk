@@ -6,49 +6,6 @@
 #include "../src/bitarray.h"
 #include "../src/codedtree.h"
 
-int validateHufftree(HuffNode *node)
-{
-    /*
-     * check if tree is complete
-     */
-    if ((!node->left && node->right) || (node->left && !node->right))
-        return 0;
-    else if (!node->left)
-        return 1;
-    return validateHufftree(node->left) && validateHufftree(node->right);
-}
-
-int hufftree_equals(HuffNode *node1, HuffNode *node2)
-{
-    /*
-     * check if tree at node1 is equal to tree at node2
-     */
-    if (!node1 || !node2) {
-        fprintf(stderr, "tree asymmetry: left %s, %s",
-                !node1 ? "is null" : "is not null",
-                !node2 ? "is null" : "is not null");
-        return 0;
-    }
-
-    if (huffnode_isLeaf(node1) && huffnode_isLeaf(node2)) {
-        if (node1->value == node2->value) {
-            return 1;
-        } else {
-            fprintf(stderr, "tree values different: left: %d, %d",
-                    (int) node1->value, (int) node2->value);
-            return 0;
-        }
-            
-    } else if (huffnode_isLeaf(node1) || huffnode_isLeaf(node2)) {
-        fprintf(stderr, "tree asymmetry: left %s, %s",
-                huffnode_isLeaf(node1) == 1 ? "is leaf" : "is not leaf",
-                huffnode_isLeaf(node2) == 1 ? "is leaf" : "is not leaf");
-        return 0;
-    }
-
-    return hufftree_equals(node1->left, node2->left)
-        && hufftree_equals(node1->right, node2->right);
-}
 
 START_TEST(test_init_hufftree)
 {
@@ -186,7 +143,7 @@ START_TEST(test_deserialize_hufftree)
     huffnode_serialize(abc, ba);
     BitArrayReader *br = bitarray_createReader(ba);
     HuffNode *deserialized = huffnode_deserialize(br);
-    ck_assert_int_eq(hufftree_equals(abc, deserialized), 1);
+    ck_assert_int_eq(huffnode_equals(abc, deserialized), 1);
     delete_bitarrayreader(br);
     delete_bitarray(ba);
     delete_huffnode(deserialized);
@@ -251,7 +208,7 @@ START_TEST(test_buildHufftree)
      * Huffman trees may vary in structure based on priority queue implementation,
      * so difficult to test ouside checking completeness
      */
-    ck_assert_int_eq(validateHufftree(tree), 1);
+    ck_assert_int_eq(huffnode_isValid(tree), 1);
     delete_huffnode(tree);
     delete_buffer(buf);
 }
@@ -266,9 +223,71 @@ START_TEST(test_cacheHuffcodes)
     HuffNode *abc = huffnode_createParent(a, bc);
 
     BitArray *codes[MAX_LEAVES] = {NULL};
-    BitArray *code = new_bitarray();
-    bitarray_pad(code, MAX_LEAVES);
+    char code[MAX_LEAVES + 1] = {'\0'};
     cacheHuffcodes(abc, codes, code, 0);
+
+    BitArray *expected = new_bitarray_initl("0", 1);
+    ck_assert_ptr_nonnull(codes['a']);
+    ck_assert_int_eq(bitarray_equals(codes['a'], expected), 1); 
+    delete_bitarray(expected);
+    expected = new_bitarray_initl("10", 2);
+    ck_assert_ptr_nonnull(codes['b']);
+    ck_assert_int_eq(bitarray_equals(codes['b'], expected), 1); 
+    delete_bitarray(expected);
+    expected = new_bitarray_initl("11", 2);
+    ck_assert_ptr_nonnull(codes['c']);
+    ck_assert_int_eq(bitarray_equals(codes['c'], expected), 1); 
+    delete_bitarray(expected);
+}
+END_TEST
+
+START_TEST(test_encodePayload)
+{
+    BitArray *codes[MAX_LEAVES + 1] = {NULL};
+    Buffer *src = new_buffer();
+    buffer_append(src, (unsigned char *)"aaabbc", 6);
+    codes['a'] = new_bitarray_initl("0", 1);
+    codes['b'] = new_bitarray_initl("10", 2);
+    codes['c'] = new_bitarray_initl("11", 2);
+    BitArray *result = new_bitarray();
+    encodePayload(src, result, codes);
+    BitArray *expected = new_bitarray_initl("000101011", 9);
+    ck_assert_int_eq(bitarray_equals(result, expected), 1);
+    delete_bitarray(expected);
+    delete_bitarray(result);
+    for (int i = 0; i < MAX_LEAVES + 1; i++) {
+        if (codes[i])
+            delete_bitarray(codes[i]);
+    }
+    delete_buffer(src);
+}
+END_TEST
+
+START_TEST(test_decodePayload)
+{
+    BitArray *codes[MAX_LEAVES + 1] = {NULL};
+    HuffNode *b = huffnode_createLeaf(2, 'b');
+    HuffNode *c = huffnode_createLeaf(1, 'c');
+    HuffNode *a = huffnode_createLeaf(3, 'a');
+    HuffNode *bc = huffnode_createParent(b, c);
+    HuffNode *abc = huffnode_createParent(a, bc);
+
+    BitArray *src = new_bitarray_initl("000101011",9);
+    BitArrayReader *reader = bitarray_createReader(src);
+    Buffer *decoded = decodePayload(reader, abc, 6);
+    char *result = (char *)decoded->data;
+    ck_assert_int_eq(strncmp("aaabbc", result, 6), 0);
+}
+END_TEST
+
+START_TEST(test_huffman_compress_decompress)
+{
+    Buffer *src = new_buffer();
+    char *str = "Hello, world!";
+    buffer_append(src, (unsigned char *)str, strlen(str) + 1);
+    Buffer *compressed = huffman_compress(src);
+    Buffer *result = huffman_extract(compressed);
+    ck_assert_str_eq((char *)result->data, str);
 }
 END_TEST
 
@@ -299,6 +318,9 @@ Suite *huffman_suite(void)
     tcase_add_test(tc_core, test_encodeLength);
     tcase_add_test(tc_core, test_decodeLength);
     tcase_add_test(tc_core, test_buildHufftree);
+    tcase_add_test(tc_core, test_cacheHuffcodes);
+    tcase_add_test(tc_core, test_encodePayload);
+    tcase_add_test(tc_core, test_decodePayload);
     suite_add_tcase(s, tc_core);
 
     return s;
