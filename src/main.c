@@ -1,5 +1,6 @@
 #include "error.h"
 #include "fileread.h"
+#include "huffman.h"
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,29 +46,42 @@ int main(int argc, char **argv)
     }
     fprintf(stderr, "reading from file %s\n", infile);
     Buffer *data = readFile(infile);
+    Buffer *processed = NULL;
     switch (mode) {
     case COMPRESS:
         fprintf(stderr, "will compress\n");
+        switch (algorithm) {
+            case HUFFMAN:
+                fprintf(stderr, "using huffman algorithm\n");
+                processed = huffman_compress(data);
+                break;
+            case LZSS:
+                fprintf(stderr, "using lzss algorithm\n");
+                break;
+            default:
+                break;
+        }
         break;
     case EXTRACT:
         fprintf(stderr, "will extract\n");
+        switch (algorithm) {
+            case HUFFMAN:
+                fprintf(stderr, "using huffman algorithm\n");
+                processed = huffman_extract(data);
+                break;
+            case LZSS:
+                fprintf(stderr, "using lzss algorithm\n");
+                break;
+            default:
+                break;
+        }
         break;
     default:
         err_quit("no mode set, exiting");
         break;
     }
-    switch (algorithm) {
-    case HUFFMAN:
-        fprintf(stderr, "using huffman algorithm\n");
-        break;
-    case LZSS:
-        fprintf(stderr, "using lzss algorithm\n");
-        break;
-    default:
-        break;
-    }
     fprintf(stderr, "writing to file %s\n", outfile);
-    writeFile(data, outfile);
+    writeFile(processed, outfile);
     delete_buffer(data);
 }
 

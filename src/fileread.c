@@ -13,7 +13,7 @@ Buffer *readFile(char *filename)
             err_quit("failed to open file for reading");
     }
 
-    char buf[READBUF];
+    unsigned char buf[READBUF];
     size_t len;
     do { // read READBUF bytes at a time
         len = read(fd, buf, READBUF);
@@ -37,8 +37,8 @@ void writeFile(Buffer *src, char *filename)
             err_quit("failed to open file for writing");
     }
     fprintf(stderr, "writing %ld bytes\n", src->len);
-    char *ptr = src->data; // use a pointer to move in the buffer
-    char *endptr = src->data + src->len;
+    unsigned char *ptr = src->data; // use a pointer to move in the buffer
+    unsigned char *endptr = src->data + src->len;
     while (ptr < endptr) {
         ssize_t count = MIN(READBUF, endptr - ptr);
         if (write(fd, ptr, count) < count) // progress READBUF bytes at a time

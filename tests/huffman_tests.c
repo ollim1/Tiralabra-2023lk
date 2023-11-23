@@ -3,9 +3,8 @@
 #include <stdlib.h>
 
 #include "../src/huffman.h"
+#include "../src/tree.h"
 #include "../src/bitarray.h"
-#include "../src/codedtree.h"
-
 
 START_TEST(test_init_hufftree)
 {
@@ -72,16 +71,6 @@ START_TEST(test_huffnode_isLeaf)
     ck_assert_int_eq(huffnode_isLeaf(nodeA), 0);
     ck_assert_int_ne(huffnode_isLeaf(nodeB), 0);
     delete_huffnode(nodeA);
-}
-END_TEST
-
-START_TEST(test_huffcode_compare)
-{
-    HuffCode a = (HuffCode){'a', 0x3, 2};
-    HuffCode b = (HuffCode){'b', 0x4, 2};
-
-    ck_assert_int_gt(huffcode_compare(&a, &b), -1);
-    ck_assert_int_lt(huffcode_compare(&b, &a), 1);
 }
 END_TEST
 
@@ -265,7 +254,6 @@ END_TEST
 
 START_TEST(test_decodePayload)
 {
-    BitArray *codes[MAX_LEAVES + 1] = {NULL};
     HuffNode *b = huffnode_createLeaf(2, 'b');
     HuffNode *c = huffnode_createLeaf(1, 'c');
     HuffNode *a = huffnode_createLeaf(3, 'a');
@@ -312,7 +300,6 @@ Suite *huffman_suite(void)
     TCase *tc_core;
     s = suite_create("Huffman");
     tc_core = tcase_create("Core");
-    tcase_add_test(tc_core, test_huffcode_compare);
     tcase_add_test(tc_core, test_serialize_hufftree);
     tcase_add_test(tc_core, test_deserialize_hufftree);
     tcase_add_test(tc_core, test_encodeLength);
@@ -321,6 +308,7 @@ Suite *huffman_suite(void)
     tcase_add_test(tc_core, test_cacheHuffcodes);
     tcase_add_test(tc_core, test_encodePayload);
     tcase_add_test(tc_core, test_decodePayload);
+    tcase_add_test(tc_core, test_huffman_compress_decompress);
     suite_add_tcase(s, tc_core);
 
     return s;

@@ -21,7 +21,7 @@ BitArray *new_bitarray_initl(char *code, size_t maxLen)
     for (size_t i = 0; i < maxLen && code[i]; i++) {
         if (code[i] != '0' && code[i] != '1')
             err_quit("invalid format while initing BitArray");
-        bitarray_append(ret, code[i]);
+        bitarray_append(ret, code[i] == '1');
     }
     return ret;
 }

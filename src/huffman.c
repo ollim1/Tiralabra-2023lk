@@ -20,7 +20,6 @@ Buffer *huffman_compress(Buffer *src)
     HuffNode *tree = buildHufftree(src);
 
     // storing codes into a lookup table
-    unsigned char lengths[MAX_LEAVES] = {0}; // lengths of coded huffman tree items
     BitArray *codes[MAX_LEAVES] = {NULL}; // Huffman coded characters
     char code[MAX_LEAVES + 1] = {'\0'};
     cacheHuffcodes(tree, codes, code, 0);
