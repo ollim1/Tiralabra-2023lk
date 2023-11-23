@@ -1,6 +1,7 @@
 #include "tree.h"
 #include "bitarray.h"
 #include "error.h"
+#include "ealloc.h"
 
 int huffnode_compare(void *left, void *right)
 {
@@ -73,9 +74,7 @@ void delete_huffnode(HuffNode *node)
 
 HuffNode *new_huffnode(HuffNode *left, HuffNode *right, ssize_t key, unsigned char value)
 {
-    HuffNode *ret = malloc(sizeof(HuffNode));
-    if (!ret)
-        err_quit("failed to allocate memory for Huffman tree node");
+    HuffNode *ret = mmalloc(sizeof(HuffNode));
 
     ret->left = left;
     ret->right = right;

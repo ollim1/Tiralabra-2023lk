@@ -187,7 +187,7 @@ Buffer *huffman_extract(Buffer *src)
     // deserialize tree
     HuffNode *tree = huffnode_deserialize(reader);
     if (!huffnode_isValid(tree))
-        err_quit("invalid Huffman tree");
+        err_quit("failed to read header");
     // decode Huffman coded payload
     Buffer *ret = decodePayload(reader, tree, decoded_length);
     return ret;

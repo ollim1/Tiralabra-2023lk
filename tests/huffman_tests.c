@@ -31,8 +31,8 @@ END_TEST
 
 START_TEST(test_huffnode_createParent)
 {
-    HuffNode *nodeB = new_huffnode(NULL, NULL, 3, 'b');
-    HuffNode *nodeC = new_huffnode(NULL, NULL, 7, 'c');
+    HuffNode *nodeB = huffnode_createLeaf(3, 'b');
+    HuffNode *nodeC = huffnode_createLeaf(7, 'c');
     HuffNode *nodeA = huffnode_createParent(nodeB, nodeC);
 
     ck_assert_ptr_eq(nodeA->left, nodeB);
@@ -53,8 +53,8 @@ END_TEST
 
 START_TEST(test_huffnode_compare)
 {
-    HuffNode *nodeB = new_huffnode(NULL, NULL, 3, 'b');
-    HuffNode *nodeC = new_huffnode(NULL, NULL, 7, 'c');
+    HuffNode *nodeB = huffnode_createLeaf(3, 'b');
+    HuffNode *nodeC = huffnode_createLeaf(7, 'c');
 
     ck_assert_int_gt(huffnode_compare(nodeB, nodeC), 0);
     ck_assert_int_lt(huffnode_compare(nodeC, nodeB), 0);
@@ -65,8 +65,8 @@ END_TEST
 
 START_TEST(test_huffnode_isLeaf)
 {
-    HuffNode *nodeB = new_huffnode(NULL, NULL, 3, 'b');
-    HuffNode *nodeC = new_huffnode(NULL, NULL, 7, 'c');
+    HuffNode *nodeB = huffnode_createLeaf(3, 'b');
+    HuffNode *nodeC = huffnode_createLeaf(7, 'c');
     HuffNode *nodeA = huffnode_createParent(nodeB, nodeC);
 
     ck_assert_int_eq(huffnode_isLeaf(nodeA), 0);

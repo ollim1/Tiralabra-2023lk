@@ -1,13 +1,12 @@
 #include "queue.h"
+#include "ealloc.h"
 
 PriorityQueue *new_queue(int (*compare)(void *, void *))
 {
     if (!compare)
         err_quit("no comparator set for queue");
 
-    PriorityQueue *ret = malloc(sizeof(PriorityQueue));
-    if (!ret)
-        err_quit("could not allocate memory for priority queue init");
+    PriorityQueue *ret = mmalloc(sizeof(PriorityQueue));
 
     ret->front = NULL;
     ret->compare = compare;
@@ -21,9 +20,7 @@ void queue_insert(PriorityQueue *queue, void *data)
         err_quit("null pointer in queue insert arguments");
 
     int (*compare)(void *, void *) = queue->compare;
-    QueueNode *new_node = malloc(sizeof(QueueNode));
-    if (!new_node)
-        err_quit("could not allocate memory for queue node");
+    QueueNode *new_node = mmalloc(sizeof(QueueNode));
     new_node->next = NULL;
     new_node->data = data;
 
