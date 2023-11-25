@@ -3,7 +3,8 @@
 #include <stdlib.h>
 
 #include "../src/huffman.h"
-#include "../src/tree.h"
+#include "../src/huffman_private.h"
+#include "../src/huffnode.h"
 #include "../src/bitarray.h"
 
 START_TEST(test_init_hufftree)
@@ -268,14 +269,63 @@ START_TEST(test_decodePayload)
 }
 END_TEST
 
-START_TEST(test_huffman_compress_decompress)
+START_TEST(test_huffman_compress_decompress_1)
 {
+    // hello world
     Buffer *src = new_buffer();
-    char *str = "Hello, world!";
-    buffer_append(src, (unsigned char *)str, strlen(str) + 1);
+    char *str1 = "Hello, world!";
+    buffer_append(src, (unsigned char *)str1, strlen(str1) + 1);
     Buffer *compressed = huffman_compress(src);
     Buffer *result = huffman_extract(compressed);
-    ck_assert_str_eq((char *)result->data, str);
+    ck_assert_str_eq((char *)result->data, str1);
+}
+END_TEST
+
+START_TEST(test_huffman_compress_decompress_2)
+{
+    // numbers
+    Buffer *src = new_buffer();
+    char *str1 = "20\n15\n10\n1\n-12";
+    buffer_append(src, (unsigned char *)str1, strlen(str1) + 1);
+    Buffer *compressed = huffman_compress(src);
+    Buffer *result = huffman_extract(compressed);
+    ck_assert_str_eq((char *)result->data, str1);
+}
+END_TEST
+
+START_TEST(test_huffman_compress_decompress_3)
+{
+    // same character
+    Buffer *src = new_buffer();
+    char *str1 = "\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa";
+    buffer_append(src, (unsigned char *)str1, strlen(str1) + 1);
+    Buffer *compressed = huffman_compress(src);
+    Buffer *result = huffman_extract(compressed);
+    ck_assert_str_eq((char *)result->data, str1);
+}
+END_TEST
+
+START_TEST(test_huffman_compress_decompress_4)
+{
+    Buffer *src = new_buffer();
+    int i;
+    for (i = 1; i < 256; i++) {
+        buffer_append(src, (unsigned char *)&i, 1);
+    }
+    i = 0;
+    buffer_append(src, (unsigned char *)&i, 1);
+    Buffer *compressed = huffman_compress(src);
+    Buffer *result = huffman_extract(compressed);
+    ck_assert_str_eq((char *)result->data, src->data);
+}
+END_TEST
+
+START_TEST(test_huffman_compress_decompress_empty)
+{
+    Buffer *src = new_buffer();
+    Buffer *compressed = huffman_compress(src);
+    Buffer *result = huffman_extract(compressed);
+    ck_assert_str_eq((char *)result->data, (char *)src->data);
 }
 END_TEST
 
@@ -308,7 +358,11 @@ Suite *huffman_suite(void)
     tcase_add_test(tc_core, test_cacheHuffcodes);
     tcase_add_test(tc_core, test_encodePayload);
     tcase_add_test(tc_core, test_decodePayload);
-    tcase_add_test(tc_core, test_huffman_compress_decompress);
+    tcase_add_test(tc_core, test_huffman_compress_decompress_1);
+    tcase_add_test(tc_core, test_huffman_compress_decompress_2);
+    tcase_add_test(tc_core, test_huffman_compress_decompress_3);
+    tcase_add_test(tc_core, test_huffman_compress_decompress_4);
+    tcase_add_test(tc_core, test_huffman_compress_decompress_empty);
     suite_add_tcase(s, tc_core);
 
     return s;

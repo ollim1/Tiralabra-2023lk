@@ -35,9 +35,19 @@ Buffer *buffer_copy(Buffer *buf)
      */
     if (!buf)
         err_quit("null pointer duplicating buffer");
+    return buffer_copyl(buf, buf->len);
+}
+
+Buffer *buffer_copyl(Buffer *buf, size_t len)
+{
+    /*
+     * duplicate a Buffer
+     */
+    if (!buf)
+        err_quit("null pointer duplicating buffer");
 
     Buffer *ret = new_buffer();
-    buffer_append(ret, buf->data, buf->len);
+    buffer_append(ret, buf->data, len < buf->len ? len : buf->len);
     return ret;
 }
 

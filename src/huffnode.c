@@ -1,4 +1,4 @@
-#include "tree.h"
+#include "huffnode.h"
 #include "bitarray.h"
 #include "error.h"
 #include "ealloc.h"

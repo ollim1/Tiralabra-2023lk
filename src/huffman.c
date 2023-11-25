@@ -1,11 +1,9 @@
 #include "huffman.h"
+#include "huffman_private.h"
 #include "queue.h"
-#include "tree.h"
+#include "huffnode.h"
 #include "bitarray.h"
 
-HuffNode *buildHufftree(Buffer *src);
-void encodePayload(Buffer *src, BitArray *dst, BitArray **codes);
-void encodeLength(BitArray *ba, size_t val);
 Buffer *huffman_compress(Buffer *src)
 {
     /*
@@ -17,6 +15,12 @@ Buffer *huffman_compress(Buffer *src)
      * 3. character encoding
      */
     // building tree
+    if (!src)
+        err_quit("null pointer in huffman_compress");
+    if (src->len == 0) {
+        fputs("file is empty, skipping compression\n", stderr);
+        return src;
+    }
     HuffNode *tree = buildHufftree(src);
 
     // storing codes into a lookup table
@@ -52,7 +56,8 @@ void encodePayload(Buffer *src, BitArray *dst, BitArray **codes)
         BitArray *traversal = codes[src->data[i]];
         if (!traversal)
             err_quit("invalid input, traversal code not found");
-        bitarray_concat(dst, traversal);
+        if (traversal->len > 0)
+            bitarray_concat(dst, traversal);
     }
 }
 
@@ -110,7 +115,7 @@ HuffNode *buildHufftree(Buffer *src)
     }
 
     PriorityQueue *queue = new_queue(huffnode_compare);
-    for (int i = 0; i < MAX_LEAVES - 1; i++) {
+    for (int i = 0; i < MAX_LEAVES; i++) {
         if (freqs[i] == 0)
             continue;
         HuffNode *new_leaf = huffnode_createLeaf(freqs[i], i);
@@ -177,6 +182,10 @@ Buffer *decodePayload(BitArrayReader *reader, HuffNode *tree, size_t decoded_len
 
 Buffer *huffman_extract(Buffer *src)
 {
+    if (src->len == 0) {
+        fputs("file is empty, skipping extraction\n", stderr);
+        return src;
+    }
     // wrap Buffer in BitArray
     BitArray *data = bitarray_fromBuffer(src);
     // create reader for BitArray

@@ -86,7 +86,7 @@ Buffer *bitarray_toBuffer(BitArray *ba)
     if (!ba)
         err_quit("null pointer converting BitArray");
 
-    return buffer_copy(ba->data);
+    return buffer_copyl(ba->data, (ba->len / 8) + 1);
 }
 
 void bitarray_concat(BitArray *a, BitArray *b)

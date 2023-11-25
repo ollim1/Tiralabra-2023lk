@@ -1,5 +1,5 @@
-#ifndef HUFFTREE_H
-#define HUFFTREE_H
+#ifndef HUFFNODE_H
+#define HUFFNODE_H
 
 #include <sys/types.h>
 #include "buffer.h"

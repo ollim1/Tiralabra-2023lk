@@ -20,6 +20,7 @@ Buffer *new_buffer();
 void delete_buffer(Buffer *);
 
 Buffer *buffer_copy(Buffer *buf);
+Buffer *buffer_copyl(Buffer *buf, size_t len);
 void buffer_pad(Buffer *buf, size_t len);
 void buffer_append(Buffer *, unsigned char *, size_t);
 

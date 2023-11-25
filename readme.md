@@ -16,10 +16,6 @@ Continued from 2023/LK.
 ### [Week 2](doc/week2.md)
 ### [Week 3](doc/week3.md)
 ### [Week 4](doc/week4.md)
-### [Week 5](doc/week5.md)
-### [Week 6](doc/week6.md)
-### [Week 7](doc/week7.md)
-### [Week 8](doc/week8.md)
 
 ## How to build
 ### Requirements
