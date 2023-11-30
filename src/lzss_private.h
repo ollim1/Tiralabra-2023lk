@@ -14,4 +14,5 @@ typedef struct lztoken_st {
 int findMatch(RingBuffer *haystack, Buffer *needle);
 void writeToken(BitArray *dst, int distance, int length);
 int readToken(BitArrayReader *src, int *distance, int *length);
+void writeString(BitArray *dst, Buffer *src);
 #endif

@@ -27,26 +27,24 @@ BitArray *encodeLZSSPayload(Buffer *src)
         unsigned char c = src->data[i];
         // append to search buffer
         buffer_append(lookaheadNext, &c, 1);
-        int index = findMatch(dictionary, lookahead);
         int indexNext = findMatch(dictionary, lookaheadNext);
         if (indexNext == -1 || i == src->len - 1) {
             if (i == src->len - 1 && indexNext >= 0)
                 buffer_append(lookahead, &c, 1);
 
             if (lookahead->len > 1) {
-                int distance =  i - index - lookahead->len;
+                int index = findMatch(dictionary, lookahead);
+                int distance =  index;
                 int length = lookahead->len;
                 writeToken(ret, distance, length);
             } else {
-                bitarray_append(ret, 0);
-                bitarray_appendByte(ret, c);
+                writeString(ret, lookahead);
             }
             buffer_clear(lookahead);
             buffer_clear(lookaheadNext);
         }
         // append to dictionary buffer
         buffer_append(lookahead, &c, 1);
-        buffer_append(lookaheadNext, &c, 1);
         ringbuffer_append(dictionary, c);
     }
     return ret;
@@ -55,7 +53,8 @@ BitArray *encodeLZSSPayload(Buffer *src)
 int findMatch(RingBuffer *haystack, Buffer *needle)
 {
     /*
-     * find string needle from ringbuffer haystack in reverse, return match
+     * find string needle from ringbuffer haystack in reverse, return distance
+     * from buffer end
      * length 
      */
 
@@ -71,6 +70,16 @@ int findMatch(RingBuffer *haystack, Buffer *needle)
             return distance;
     }
     return -1;
+}
+
+void writeString(BitArray *dst, Buffer *src)
+{
+    if (!dst || !src)
+        err_quit("null pointer writing literal");
+    for (size_t i = 0; i < src->len; i++) {
+        bitarray_append(dst, 0);
+        bitarray_appendByte(dst, src->data[i]);
+    }
 }
 
 void writeToken(BitArray *dst, int distance, int length)
