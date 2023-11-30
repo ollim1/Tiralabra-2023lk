@@ -95,3 +95,10 @@ void buffer_resize(Buffer *buf, size_t newSize)
     buf->data = newData;
     buf->size = newSize;
 }
+
+void buffer_clear(Buffer *buf)
+{
+    if (!buf)
+        err_quit("null pointer in buffer_clear");
+    buf->len = 0;
+}

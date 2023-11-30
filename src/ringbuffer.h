@@ -18,6 +18,8 @@ typedef struct ringbuffer_st {
 RingBuffer *new_ringbuffer(size_t size);
 void delete_ringbuffer(RingBuffer *rb);
 char ringbuffer_get(RingBuffer *src, ssize_t pos);
-void ringbuffer_set(RingBuffer *dst, char val, ssize_t pos);
-void ringbuffer_append(RingBuffer *dst, char val);
+char ringbuffer_getRev(RingBuffer *src, ssize_t pos);
+void ringbuffer_set(RingBuffer *dst, unsigned char val, ssize_t pos);
+void ringbuffer_append(RingBuffer *dst, unsigned char val);
+void ringbuffer_appendString(RingBuffer *dst, unsigned char *data, size_t len);
 #endif

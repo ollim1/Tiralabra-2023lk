@@ -23,18 +23,24 @@ check-huffman:
 	$(CC) -O0 -o huffmantest tests/huffman_tests.c -g $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS)
 	@./huffmantest
 
+check-lzss: 
+	$(CC) -O0 -o lzsstest tests/lzss_tests.c -g $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS)
+	@./lzsstest
+
 codecov:
 	$(CC) -ftest-coverage -coverage -g -fprofile-arcs -O0 -o unittest tests/unit_tests.c $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS)
 	$(CC) -ftest-coverage -coverage -g -fprofile-arcs -O0 -o huffmantest tests/huffman_tests.c $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS)
+	$(CC) -ftest-coverage -coverage -g -fprofile-arcs -O0 -o lzsstest tests/lzss_tests.c $(filter-out src/main.c, $(wildcard src/*.c)) $(CHECK_FLAGS)
 
 coverage-html: codecov
 	@./unittest
 	@./huffmantest
+	@./lzsstest
 	gcovr --exclude tests/ --exclude src/error.c --exclude src/fileread.c --exclude src/main.c --html-details coverage.html
 
 format:
 	@python ./format.py
 
 clean:
-	rm -f compressor unittest huffmantest $(OBJLIST) *.gcda *.gcno *.gcov coverage.*
+	rm -f compressor unittest huffmantest lzsstest $(OBJLIST) *.gcda *.gcno *.gcov coverage.*
 compressor: $(OBJLIST)

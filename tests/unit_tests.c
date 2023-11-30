@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "../src/bitarray.h"
+#include "../src/ringbuffer.h"
 #include "../src/buffer.h"
 #include "../src/queue.h"
 
@@ -75,6 +76,41 @@ Suite *buffer_suite(void)
     tcase_add_test(tc_core, test_buffer_append);
     tcase_add_test(tc_core, test_buffer_pad);
     tcase_add_test(tc_core, test_buffer_expands);
+    suite_add_tcase(s, tc_core);
+
+    return s;
+}
+
+START_TEST(test_ringbuffer_init)
+{
+    RingBuffer *buf = new_ringbuffer(1000);
+    ck_assert_ptr_nonnull(buf);
+    ck_assert_ptr_nonnull(buf->data);
+    ck_assert_int_eq(buf->len, 0);
+    ck_assert_int_eq(buf->size, 1000);
+    delete_ringbuffer(buf);
+}
+END_TEST
+
+START_TEST(test_ringbuffer_append_get)
+{
+    RingBuffer *buf = new_ringbuffer(5);
+    ringbuffer_appendString(buf, (unsigned char *)"aybabtu", 7);
+    ck_assert_mem_eq(buf->data, (unsigned char *)"tubab", 5);
+    ck_assert_int_eq(ringbuffer_get(buf, 0), 'b');
+    ck_assert_int_eq(ringbuffer_getRev(buf, 0), 'u');
+    delete_ringbuffer(buf);
+}
+END_TEST
+
+Suite *ringbuffer_suite(void)
+{
+    Suite *s;
+    TCase *tc_core;
+    s = suite_create("RingBuffer");
+    tc_core = tcase_create("Core");
+    tcase_add_test(tc_core, test_ringbuffer_init);
+    tcase_add_test(tc_core, test_ringbuffer_append_get);
     suite_add_tcase(s, tc_core);
 
     return s;
@@ -299,11 +335,13 @@ int main(void)
     Suite *buffer = buffer_suite();
     Suite *queue = priorityqueue_suite();
     Suite *bitarray = bitarray_suite();
+    Suite *ringbuffer = ringbuffer_suite();
     SRunner *sr;
 
     sr = srunner_create(buffer);
     srunner_add_suite(sr, queue);
     srunner_add_suite(sr, bitarray);
+    srunner_add_suite(sr, ringbuffer);
 
     srunner_run_all(sr, CK_VERBOSE);
     number_failed = srunner_ntests_failed(sr);

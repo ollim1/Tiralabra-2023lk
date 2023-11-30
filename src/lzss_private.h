@@ -1,16 +1,17 @@
 #ifndef LZSS_PRIVATE_H
 #define LZSS_PRIVATE_H
 #include "bitarray.h"
+#include "ringbuffer.h"
 #define WINDOW_SIZE 4096 // size of dictionary window
-#define TOKEN_POS_BITS 12 // amount of bits for position in dictionary window
-#define TOKEN_DIST_BITS 4 // amount of bits for reference string
+#define TOKEN_DISTANCE_BITS 12 // amount of bits for position in dictionary window
+#define TOKEN_LENGTH_BITS 4 // amount of bits for reference string
 
 typedef struct lztoken_st {
-    int exists;
-    int pos;
-    int dist;
+    int distance;
+    int length;
 } LZToken;
 
-void writeToken(BitArray *dst, LZToken *token);
-int readToken(BitArrayReader *src, LZToken *dst);
+int findMatch(RingBuffer *haystack, Buffer *needle);
+void writeToken(BitArray *dst, int distance, int length);
+int readToken(BitArrayReader *src, int *distance, int *length);
 #endif
