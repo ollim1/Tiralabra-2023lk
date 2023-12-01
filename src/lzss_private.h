@@ -6,13 +6,10 @@
 #define TOKEN_DISTANCE_BITS 12 // amount of bits for position in dictionary window
 #define TOKEN_LENGTH_BITS 4 // amount of bits for reference string
 
-typedef struct lztoken_st {
-    int distance;
-    int length;
-} LZToken;
-
 int findMatch(RingBuffer *haystack, Buffer *needle);
 void writeToken(BitArray *dst, int distance, int length);
 int readToken(BitArrayReader *src, int *distance, int *length);
 void writeString(BitArray *dst, Buffer *src);
+void encodeLZSSPayloadBitLevel(Buffer *src, BitArray *dst);
+Buffer *decodeLZSSPayloadBitLevel(BitArrayReader *reader, size_t decoded_length);
 #endif

@@ -140,52 +140,6 @@ START_TEST(test_deserialize_hufftree)
 }
 END_TEST
 
-START_TEST(test_encodeLength)
-{
-    BitArray *ba = new_bitarray();
-
-    encodeLength(ba, 0xe7489);
-    BitArrayReader *br = bitarray_createReader(ba);
-
-    int bit;
-    unsigned char byte;
-    bitarrayreader_readBit(br, &bit);
-    ck_assert_int_eq(bit, 0);
-    bitarrayreader_readByte(br, &byte);
-    ck_assert_int_eq(byte, 0x89);
-    bitarrayreader_readBit(br, &bit);
-    ck_assert_int_eq(bit, 0);
-    bitarrayreader_readByte(br, &byte);
-    ck_assert_int_eq(byte, 0x74);
-    bitarrayreader_readBit(br, &bit);
-    ck_assert_int_eq(bit, 0);
-    bitarrayreader_readByte(br, &byte);
-    ck_assert_int_eq(byte, 0xe);
-    bitarrayreader_readBit(br, &bit);
-    ck_assert_int_eq(bit, 1);
-    delete_bitarrayreader(br);
-    delete_bitarray(ba);
-}
-END_TEST
-
-START_TEST(test_decodeLength)
-{
-    BitArray *ba = new_bitarray();
-
-    size_t expected = 0x7a1f9;
-    size_t val = expected;
-
-    while (val > 0) {
-        bitarray_append(ba, 0);
-        bitarray_appendByte(ba, val & 0xff);
-        val >>= 8;
-    }
-    bitarray_append(ba, 1);
-    BitArrayReader *br = bitarray_createReader(ba);
-    size_t result = decodeLength(br);
-    ck_assert_int_eq(result, expected);
-}
-END_TEST
 
 START_TEST(test_buildHufftree)
 {
@@ -231,7 +185,7 @@ START_TEST(test_cacheHuffcodes)
 }
 END_TEST
 
-START_TEST(test_encodePayload)
+START_TEST(test_encodeHuffmanPayload)
 {
     BitArray *codes[MAX_LEAVES + 1] = {NULL};
     Buffer *src = new_buffer();
@@ -240,7 +194,7 @@ START_TEST(test_encodePayload)
     codes['b'] = new_bitarray_initl("10", 2);
     codes['c'] = new_bitarray_initl("11", 2);
     BitArray *result = new_bitarray();
-    encodePayload(src, result, codes);
+    encodeHuffmanPayload(src, result, codes);
     BitArray *expected = new_bitarray_initl("000101011", 9);
     ck_assert_int_eq(bitarray_equals(result, expected), 1);
     delete_bitarray(expected);
@@ -253,7 +207,7 @@ START_TEST(test_encodePayload)
 }
 END_TEST
 
-START_TEST(test_decodePayload)
+START_TEST(test_decodeHuffmanPayload)
 {
     HuffNode *b = huffnode_createLeaf(2, 'b');
     HuffNode *c = huffnode_createLeaf(1, 'c');
@@ -263,7 +217,7 @@ START_TEST(test_decodePayload)
 
     BitArray *src = new_bitarray_initl("000101011",9);
     BitArrayReader *reader = bitarray_createReader(src);
-    Buffer *decoded = decodePayload(reader, abc, 6);
+    Buffer *decoded = decodeHuffmanPayload(reader, abc, 6);
     char *result = (char *)decoded->data;
     ck_assert_int_eq(strncmp("aaabbc", result, 6), 0);
 }
@@ -352,12 +306,10 @@ Suite *huffman_suite(void)
     tc_core = tcase_create("Core");
     tcase_add_test(tc_core, test_serialize_hufftree);
     tcase_add_test(tc_core, test_deserialize_hufftree);
-    tcase_add_test(tc_core, test_encodeLength);
-    tcase_add_test(tc_core, test_decodeLength);
     tcase_add_test(tc_core, test_buildHufftree);
     tcase_add_test(tc_core, test_cacheHuffcodes);
-    tcase_add_test(tc_core, test_encodePayload);
-    tcase_add_test(tc_core, test_decodePayload);
+    tcase_add_test(tc_core, test_encodeHuffmanPayload);
+    tcase_add_test(tc_core, test_decodeHuffmanPayload);
     tcase_add_test(tc_core, test_huffman_compress_decompress_1);
     tcase_add_test(tc_core, test_huffman_compress_decompress_2);
     tcase_add_test(tc_core, test_huffman_compress_decompress_3);

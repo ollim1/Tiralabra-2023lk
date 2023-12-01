@@ -31,11 +31,11 @@ Buffer *huffman_compress(Buffer *src)
     // encoding input data using Huffman coded characters
     BitArray *output = new_bitarray();
     // encode unpacked length
-    encodeLength(output, src->len);
+    bitarray_writeInteger(output, src->len);
     // encode tree
     huffnode_serialize(tree, output);
     // encode payload
-    encodePayload(src, output, codes);
+    encodeHuffmanPayload(src, output, codes);
 
     Buffer *ret = bitarray_toBuffer(output);
     delete_bitarray(output);
@@ -47,10 +47,10 @@ Buffer *huffman_compress(Buffer *src)
     return ret;
 }
 
-void encodePayload(Buffer *src, BitArray *dst, BitArray **codes)
+void encodeHuffmanPayload(Buffer *src, BitArray *dst, BitArray **codes)
 {
     if (!src || !dst || !codes)
-        err_quit("null pointer in encodePayload");
+        err_quit("null pointer in encodeHuffmanPayload");
     
     for (size_t i = 0; i < src->len; i++) {
         BitArray *traversal = codes[src->data[i]];
@@ -61,44 +61,6 @@ void encodePayload(Buffer *src, BitArray *dst, BitArray **codes)
     }
 }
 
-void encodeLength(BitArray *ba, size_t val)
-{
-    /*
-     * encode Huffman buffer length in bit packed format:
-     * 1 bit for end marker, 8 bits for data
-     * little endian order
-     */
-    while (val > 0) {
-        bitarray_append(ba, 0);
-        bitarray_appendByte(ba, val & 0xff);
-        val >>= 8;
-    }
-    bitarray_append(ba, 1); // append end marker
-}
-
-size_t decodeLength(BitArrayReader *br)
-{
-    /*
-     * decode Huffman buffer length
-     */
-    int end;
-    
-    if (bitarrayreader_readBit(br, &end) != 1)
-        err_quit("failed to read bit in decodeLength");
-
-    size_t ret = 0;
-    int offset = 0;
-    while (!end) {
-        unsigned char byte;
-        if (bitarrayreader_readByte(br, &byte) != 8)
-            err_quit("failed to read byte in decodeLength");
-        ret |= (byte << offset);
-        offset += 8;
-        if (bitarrayreader_readBit(br, &end) != 1)
-            err_quit("failed to read bit in decodeLength");
-    }
-    return ret;
-}
 
 HuffNode *buildHufftree(Buffer *src)
 {
@@ -155,7 +117,7 @@ void cacheHuffcodes(HuffNode *node, BitArray **codes, char *code, int depth)
     cacheHuffcodes(node->right, codes, code, depth + 1);
 }
 
-Buffer *decodePayload(BitArrayReader *reader, HuffNode *tree, size_t decoded_length)
+Buffer *decodeHuffmanPayload(BitArrayReader *reader, HuffNode *tree, size_t decoded_length)
 {
     if (!reader || !tree)
         err_quit("null pointer when decoding data");
@@ -191,12 +153,12 @@ Buffer *huffman_extract(Buffer *src)
     // create reader for BitArray
     BitArrayReader *reader = bitarray_createReader(data);
     // decode uncompressed length
-    size_t decoded_length = decodeLength(reader);
+    size_t decoded_length = bitarrayreader_readInteger(reader);
     // deserialize tree
     HuffNode *tree = huffnode_deserialize(reader);
     if (!huffnode_isValid(tree))
         err_quit("failed to read header");
     // decode Huffman coded payload
-    Buffer *ret = decodePayload(reader, tree, decoded_length);
+    Buffer *ret = decodeHuffmanPayload(reader, tree, decoded_length);
     return ret;
 }

@@ -37,4 +37,7 @@ void bitarray_setString(BitArray *, unsigned char *, size_t len, size_t pos);
 void bitarray_pad(BitArray *, size_t);
 int bitarray_get(BitArray *, size_t);
 unsigned char bitarray_getByte(BitArray *, size_t);
+void bitarray_writeInteger(BitArray *ba, size_t val);
+size_t bitarrayreader_readInteger(BitArrayReader *br);
+
 #endif

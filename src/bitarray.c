@@ -277,3 +277,42 @@ void delete_bitarrayreader(BitArrayReader *br)
 
     free(br);
 }
+
+void bitarray_writeInteger(BitArray *ba, size_t val)
+{
+    /*
+     * encode Huffman buffer length in bit packed format:
+     * 1 bit for end marker, 8 bits for data
+     * little endian order
+     */
+    while (val > 0) {
+        bitarray_append(ba, 0);
+        bitarray_appendByte(ba, val & 0xff);
+        val >>= 8;
+    }
+    bitarray_append(ba, 1); // append end marker
+}
+
+size_t bitarrayreader_readInteger(BitArrayReader *br)
+{
+    /*
+     * decode Huffman buffer length
+     */
+    int end = 0;
+    
+    if (bitarrayreader_readBit(br, &end) != 1)
+        err_quit("failed to read bit in decodeLength");
+
+    size_t ret = 0;
+    int offset = 0;
+    while (!end) {
+        unsigned char byte = 0;
+        if (bitarrayreader_readByte(br, &byte) != 8)
+            err_quit("failed to read byte in decodeLength");
+        ret |= (byte << offset);
+        offset += 8;
+        if (bitarrayreader_readBit(br, &end) != 1)
+            err_quit("failed to read bit in decodeLength");
+    }
+    return ret;
+}

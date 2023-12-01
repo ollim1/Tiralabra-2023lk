@@ -13,12 +13,18 @@ Buffer *lzss_compress(Buffer *src)
      * Bit-level variant.
      */
     Buffer *ret = new_buffer();
+
     return ret;
 }
 
-BitArray *encodeLZSSPayload(Buffer *src)
+void encodeLZSSPayloadBitLevel(Buffer *src, BitArray *dst)
 {
-    BitArray *ret = new_bitarray();
+    /*
+     * encode LZSS payload. Bit-level implementation.
+     * May implement a byte-level version in which every 9th byte contains the
+     * start bits of the next 8 bytes. This may make it easier to compress using
+     * the Huffman algorithm, at the cost of an extra bit used per reference token.
+     */
     RingBuffer *dictionary = new_ringbuffer(WINDOW_SIZE);
     Buffer *lookahead = new_buffer();
     Buffer *lookaheadNext = new_buffer();
@@ -36,9 +42,9 @@ BitArray *encodeLZSSPayload(Buffer *src)
                 int index = findMatch(dictionary, lookahead);
                 int distance =  index;
                 int length = lookahead->len;
-                writeToken(ret, distance, length);
+                writeToken(dst, distance, length);
             } else {
-                writeString(ret, lookahead);
+                writeString(dst, lookahead);
             }
             buffer_clear(lookahead);
             buffer_clear(lookaheadNext);
@@ -47,7 +53,46 @@ BitArray *encodeLZSSPayload(Buffer *src)
         buffer_append(lookahead, &c, 1);
         ringbuffer_append(dictionary, c);
     }
-    return ret;
+    delete_buffer(lookahead);
+    delete_buffer(lookaheadNext);
+    delete_ringbuffer(dictionary);
+}
+
+Buffer *decodeLZSSPayloadBitLevel(BitArrayReader *reader, size_t decoded_length)
+{
+    if (!reader)
+        err_quit("null pointer when decoding LZSS payload");
+
+    size_t total = 0;
+    Buffer *output = new_buffer();
+    while (total < decoded_length) {
+        int bit = 0;
+
+        if (bitarrayreader_readBit(reader, &bit) < 1)
+            err_quit("unexpected end of file while reading payload");
+
+        if (bit == 1) {
+            // token bit set, the next two bytes will contain a token
+            int distance = 0;
+            int length = 0;
+            if (readToken(reader, &distance, &length) < 16)
+                err_quit("unexpected end of file while reading payload");
+            // copy string indicated by token
+            if (distance > output->len || distance <= 0 || distance < length)
+                err_quit("token index out of bounds");
+            buffer_append(output, &output->data[output->len - distance], length);
+            total += length;
+        } else {
+            // token bit unset, next byte will be a literal
+            unsigned char byte = 0;
+            if (bitarrayreader_readByte(reader, &byte) < 8)
+                err_quit("unexpected end of file while reading payload");
+            buffer_append(output, &byte, 1);
+            total++;
+        }
+    }
+
+    return output;
 }
 
 int findMatch(RingBuffer *haystack, Buffer *needle)
@@ -67,13 +112,16 @@ int findMatch(RingBuffer *haystack, Buffer *needle)
         else
             length = 0;
         if (length >= needle->len)
-            return distance;
+            return distance + 1;
     }
     return -1;
 }
 
 void writeString(BitArray *dst, Buffer *src)
 {
+    /*
+     * write string of LZSS literals to BitArray
+     */
     if (!dst || !src)
         err_quit("null pointer writing literal");
     for (size_t i = 0; i < src->len; i++) {

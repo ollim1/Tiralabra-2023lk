@@ -34,7 +34,7 @@ char ringbuffer_get(RingBuffer *src, ssize_t pos)
 char ringbuffer_getRev(RingBuffer *src, ssize_t pos)
 {
     /*
-     * get value from buffer with indexing in reverse from the end
+     * get value from buffer, indexing in reverse from the end
      */
     if (!src)
         err_quit("null pointer in ringbuffer_get");

@@ -222,6 +222,66 @@ START_TEST(test_bitarray_concat)
 }
 END_TEST
 
+START_TEST(test_bitarray_equals)
+{
+    BitArray *a = new_bitarray_initl("01011", 5);
+    BitArray *b = new_bitarray_initl("10011", 5);
+
+    bitarray_concat(a, b);
+    ck_assert_int_eq(bitarray_equals(a, a), 1);
+    ck_assert_int_eq(bitarray_equals(a, b), 0);
+    delete_bitarray(a);
+    delete_bitarray(b);
+}
+END_TEST
+
+START_TEST(test_bitarray_writeInteger)
+{
+    BitArray *ba = new_bitarray();
+
+    bitarray_writeInteger(ba, 0xe7489);
+    BitArrayReader *br = bitarray_createReader(ba);
+
+    int bit;
+    unsigned char byte;
+    bitarrayreader_readBit(br, &bit);
+    ck_assert_int_eq(bit, 0);
+    bitarrayreader_readByte(br, &byte);
+    ck_assert_int_eq(byte, 0x89);
+    bitarrayreader_readBit(br, &bit);
+    ck_assert_int_eq(bit, 0);
+    bitarrayreader_readByte(br, &byte);
+    ck_assert_int_eq(byte, 0x74);
+    bitarrayreader_readBit(br, &bit);
+    ck_assert_int_eq(bit, 0);
+    bitarrayreader_readByte(br, &byte);
+    ck_assert_int_eq(byte, 0xe);
+    bitarrayreader_readBit(br, &bit);
+    ck_assert_int_eq(bit, 1);
+    delete_bitarrayreader(br);
+    delete_bitarray(ba);
+}
+END_TEST
+
+START_TEST(test_bitarrayreader_readInteger)
+{
+    BitArray *ba = new_bitarray();
+
+    size_t expected = 0x7a1f9;
+    size_t val = expected;
+
+    while (val > 0) {
+        bitarray_append(ba, 0);
+        bitarray_appendByte(ba, val & 0xff);
+        val >>= 8;
+    }
+    bitarray_append(ba, 1);
+    BitArrayReader *br = bitarray_createReader(ba);
+    size_t result = bitarrayreader_readInteger(br);
+    ck_assert_int_eq(result, expected);
+}
+END_TEST
+
 START_TEST(test_bitarray_set_get)
 {
     BitArray *ba = new_bitarray();
@@ -323,6 +383,8 @@ Suite *bitarray_suite(void)
     tcase_add_test(tc_core, test_bitarray_appendstring);
     tcase_add_test(tc_core, test_bitarray_appendZeroLength);
     tcase_add_test(tc_core, test_bitarray_set_get_byte);
+    tcase_add_test(tc_core, test_bitarray_writeInteger);
+    tcase_add_test(tc_core, test_bitarrayreader_readInteger);
     tcase_add_test(tc_core, test_bitarray_concat);
     tcase_add_test(tc_core, test_bitarray_toBuffer);
     suite_add_tcase(s, tc_core);
