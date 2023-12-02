@@ -70,12 +70,12 @@ START_TEST(testEncodeLZSSPayload)
     bitarray_append(expected, 0);
     bitarray_appendByte(expected, 'S');
     // append token for "AM"stored in little-endian format
-    writeToken(expected, 4, 2);
+    writeToken(expected, 3, 2);
     bitarray_append(expected, 0);
     bitarray_appendByte(expected, '.');
     bitarray_append(expected, 0);
     bitarray_appendByte(expected, ' ');
-    writeToken(expected, 10, 9);
+    writeToken(expected, 9, 9);
 
     ck_assert_str_eq(bitarray_toString(result), bitarray_toString(expected));
 }
@@ -100,12 +100,12 @@ START_TEST(testDecodeLZSSPayload)
     bitarray_append(compressed, 0);
     bitarray_appendByte(compressed, 'S');
     // append token for "AM"stored in little-endian format
-    writeToken(compressed, 4, 2);
+    writeToken(compressed, 3, 2);
     bitarray_append(compressed, 0);
     bitarray_appendByte(compressed, '.');
     bitarray_append(compressed, 0);
     bitarray_appendByte(compressed, ' ');
-    writeToken(compressed, 10, 9);
+    writeToken(compressed, 9, 9);
     BitArrayReader *reader = bitarray_createReader(compressed);
     Buffer *decompressed = decodeLZSSPayloadBitLevel(reader, 19);
 

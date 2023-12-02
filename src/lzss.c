@@ -63,7 +63,7 @@ void encodeLZSSPayloadBitLevel(Buffer *src, BitArray *dst)
             }
 
             if (searchPrev->len > 1) {
-                int distance = searchIndexPrev - searchPrev->len + 1;
+                int distance = searchIndexPrev - searchPrev->len;
                 int length = searchPrev->len;
                 writeToken(dst, distance, length);
             } else {
@@ -109,7 +109,7 @@ Buffer *decodeLZSSPayloadBitLevel(BitArrayReader *reader, size_t decoded_length)
             // copy string indicated by token
             if (distance > output->len || distance < length)
                 err_quit("token distance out of bounds");
-            buffer_append(output, &output->data[output->len - distance], length);
+            buffer_append(output, &output->data[output->len - distance - 1], length);
         } else {
             // token bit unset, next byte will be a literal
             unsigned char byte = 0;
