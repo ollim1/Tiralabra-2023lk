@@ -7,7 +7,7 @@
 #include "../src/ringbuffer.h"
 #include "../src/bitarray.h"
 
-START_TEST(testFindMatch)
+START_TEST(testFindMatch1)
 {
     RingBuffer *haystack = new_ringbuffer(1000);
     Buffer *needle = new_buffer();
@@ -18,6 +18,34 @@ START_TEST(testFindMatch)
 
     int result = findMatch(haystack, needle);
     ck_assert_int_eq(result, 5);
+}
+END_TEST
+
+START_TEST(testFindMatch2)
+{
+    RingBuffer *haystack = new_ringbuffer(30);
+    Buffer *needle = new_buffer();
+    char *strA = "I AM SAM. I AM SAM. I AM SAM. I AM SAM. I AM SAM. I AM SAM. I AM SAM. I AM SAM.";
+    char *strB = "I AM SAM.";
+    ringbuffer_appendString(haystack, (unsigned char *)strA, strlen(strA) + 1);
+    buffer_append(needle, (unsigned char *)strB, strlen(strB) + 1);
+
+    int result = findMatch(haystack, needle);
+    ck_assert_int_eq(result, 10);
+}
+END_TEST
+
+START_TEST(testFindMatch3)
+{
+    RingBuffer *haystack = new_ringbuffer(30);
+    Buffer *needle = new_buffer();
+    char *strA = "";
+    char *strB = "I AM SAM.";
+    ringbuffer_appendString(haystack, (unsigned char *)strA, strlen(strA) + 1);
+    buffer_append(needle, (unsigned char *)strB, strlen(strB) + 1);
+
+    int result = findMatch(haystack, needle);
+    ck_assert_int_eq(result, -1);
 }
 END_TEST
 
@@ -42,20 +70,15 @@ START_TEST(testEncodeLZSSPayload)
     bitarray_append(expected, 0);
     bitarray_appendByte(expected, 'S');
     // append token for "AM"stored in little-endian format
-    bitarray_append(expected, 1);
-    int token = (4 << TOKEN_LENGTH_BITS) | 2;
-    bitarray_appendByte(expected, token & 0xff);
-    bitarray_appendByte(expected, token >> 8);
+    writeToken(expected, 4, 2);
     bitarray_append(expected, 0);
     bitarray_appendByte(expected, '.');
     bitarray_append(expected, 0);
     bitarray_appendByte(expected, ' ');
     bitarray_append(expected, 1);
-    token = (10 << TOKEN_LENGTH_BITS) | 10;
-    bitarray_appendByte(expected, token & 0xff);
-    bitarray_appendByte(expected, token >> 8);
+    writeToken(expected, 10, 9);
 
-    ck_assert_int_eq(bitarray_equals(result, expected), 0);
+    ck_assert_str_eq(bitarray_toString(result), bitarray_toString(expected));
 }
 END_TEST
 
@@ -65,11 +88,88 @@ START_TEST(testDecodeLZSSPayload)
     unsigned char *str = (unsigned char *)"I AM SAM. I AM SAM."; 
     buffer_append(buf, str, 19);
     BitArray *compressed = new_bitarray();
-    encodeLZSSPayloadBitLevel(buf, compressed);
+    bitarray_append(compressed, 0);
+    bitarray_appendByte(compressed, 'I');
+    bitarray_append(compressed, 0);
+    bitarray_appendByte(compressed, ' ');
+    bitarray_append(compressed, 0);
+    bitarray_appendByte(compressed, 'A');
+    bitarray_append(compressed, 0);
+    bitarray_appendByte(compressed, 'M');
+    bitarray_append(compressed, 0);
+    bitarray_appendByte(compressed, ' ');
+    bitarray_append(compressed, 0);
+    bitarray_appendByte(compressed, 'S');
+    // append token for "AM"stored in little-endian format
+    bitarray_append(compressed, 1);
+    int token = (4 << TOKEN_LENGTH_BITS) | 2;
+    bitarray_appendByte(compressed, token & 0xff);
+    bitarray_appendByte(compressed, token >> 8);
+    bitarray_append(compressed, 0);
+    bitarray_appendByte(compressed, '.');
+    bitarray_append(compressed, 0);
+    bitarray_appendByte(compressed, ' ');
+    bitarray_append(compressed, 1);
+    writeToken(compressed, 10, 9);
     BitArrayReader *reader = bitarray_createReader(compressed);
     Buffer *decompressed = decodeLZSSPayloadBitLevel(reader, 19);
 
     ck_assert_mem_eq(buf->data, decompressed->data, 19);
+}
+END_TEST
+
+START_TEST(testWriteToken)
+{
+    BitArray *result = new_bitarray();
+    int distance_expected = 10;
+    int length_expected = 10;
+    writeToken(result, distance_expected, length_expected);
+    // 1 10101010 00000000
+    int bit = 0;
+    unsigned char byte = 0;
+    BitArrayReader *reader = bitarray_createReader(result);
+    bitarrayreader_readBit(reader, &bit);
+    ck_assert_int_eq(bit, 1);
+    bitarrayreader_readByte(reader, &byte);
+    ck_assert_int_eq(byte, 170);
+    bitarrayreader_readByte(reader, &byte);
+    ck_assert_int_eq(byte, 0);
+}
+END_TEST
+
+START_TEST(testReadWriteToken)
+{
+    for (int i = 0; i < WINDOW_SIZE; i += 11) {
+        BitArray *ba = new_bitarray();
+        int distance_expected = i;
+        int length_expected = i % 15;
+        writeToken(ba, distance_expected, length_expected);
+        BitArrayReader *br = bitarray_createReader(ba);
+        int a;
+        bitarrayreader_readBit(br, &a);
+        int distance_result = 0;
+        int length_result = 0;
+        readToken(br, &distance_result, &length_result);
+
+        ck_assert_int_eq(distance_result, distance_expected);
+        ck_assert_int_eq(length_result, length_expected);
+        delete_bitarrayreader(br);
+        delete_bitarray(ba);
+    }
+}
+END_TEST
+
+START_TEST(testEncodeDecodeLZSSPayload)
+{
+    Buffer *src = new_buffer();
+    char *str = "jiopfwejfopfmwealfnn09v09a8g-afewjopf23rn;jfsaf";
+    size_t len = strlen(str) + 1;
+    buffer_append(src, (unsigned char *)str, len);
+    BitArray *ba = new_bitarray();
+    encodeLZSSPayloadBitLevel(src, ba);
+    BitArrayReader *reader = bitarray_createReader(ba);
+    Buffer *result = decodeLZSSPayloadBitLevel(reader, len);
+    ck_assert_mem_eq(result->data, src->data, len);
 }
 END_TEST
 
@@ -79,9 +179,14 @@ Suite *lzss_suite(void)
     TCase *tc_core;
     s = suite_create("LZSS");
     tc_core = tcase_create("Core");
-    tcase_add_test(tc_core, testFindMatch);
+    tcase_add_test(tc_core, testFindMatch1);
+    tcase_add_test(tc_core, testFindMatch2);
+    tcase_add_test(tc_core, testFindMatch3);
+    tcase_add_test(tc_core, testReadWriteToken);
+    tcase_add_test(tc_core, testWriteToken);
     tcase_add_test(tc_core, testEncodeLZSSPayload);
     tcase_add_test(tc_core, testDecodeLZSSPayload);
+    tcase_add_test(tc_core, testEncodeDecodeLZSSPayload);
     suite_add_tcase(s, tc_core);
 
     return s;

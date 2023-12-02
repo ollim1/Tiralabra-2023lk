@@ -107,7 +107,7 @@ void cacheHuffcodes(HuffNode *node, BitArray **codes, char *code, int depth)
         return;
 
     if (huffnode_isLeaf(node)) {
-        codes[node->value] = new_bitarray_initl(code, depth);
+        codes[node->value] = new_bitarray_fromStringl(code, depth);
         return;
     }
 

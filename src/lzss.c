@@ -5,6 +5,7 @@
 #include "bitarray.h"
 #include "ringbuffer.h"
 #include "buffer.h"
+#include <stdint.h>
 
 Buffer *lzss_compress(Buffer *src)
 {
@@ -20,41 +21,46 @@ Buffer *lzss_compress(Buffer *src)
 void encodeLZSSPayloadBitLevel(Buffer *src, BitArray *dst)
 {
     /*
-     * encode LZSS payload. Bit-level implementation.
+     * encode LZSS payload. Bit-level implementation. Each byte literal is prefixed
+     * by a 'zero' bit, while two-byte tokens are prefixed by 'one' bits.
      * May implement a byte-level version in which every 9th byte contains the
      * start bits of the next 8 bytes. This may make it easier to compress using
      * the Huffman algorithm, at the cost of an extra bit used per reference token.
      */
     RingBuffer *dictionary = new_ringbuffer(WINDOW_SIZE);
-    Buffer *lookahead = new_buffer();
-    Buffer *lookaheadNext = new_buffer();
+    Buffer *search = new_buffer();
+    Buffer *searchPrev = new_buffer();
+    int searchIndexPrev = -1;
     for (size_t i = 0; i < src->len; i++) {
         // read byte from input
         unsigned char c = src->data[i];
         // append to search buffer
-        buffer_append(lookaheadNext, &c, 1);
-        int indexNext = findMatch(dictionary, lookaheadNext);
-        if (indexNext == -1 || i == src->len - 1) {
-            if (i == src->len - 1 && indexNext >= 0)
-                buffer_append(lookahead, &c, 1);
+        buffer_append(search, &c, 1);
+        int searchIndex = findMatch(dictionary, search);
 
-            if (lookahead->len > 1) {
-                int index = findMatch(dictionary, lookahead);
-                int distance =  index;
-                int length = lookahead->len;
+        // if a matching string is in the ring buffer, then check if the
+        // previous search string was
+        if (searchIndex == -1 || i == src->len - 1 || searchPrev->len == 15) {
+            if (i == src->len - 1 && searchIndex != -1)
+                buffer_append(searchPrev, &c, 1);
+
+            if (searchPrev->len > 1) {
+                int distance = searchIndexPrev;
+                int length = searchPrev->len;
                 writeToken(dst, distance, length);
             } else {
-                writeString(dst, lookahead);
+                writeString(dst, searchPrev);
             }
-            buffer_clear(lookahead);
-            buffer_clear(lookaheadNext);
+            // clear search buffers when done
+            buffer_clear(searchPrev);
+            buffer_truncate(search);
         }
+        searchIndexPrev = searchIndex;
+        buffer_append(searchPrev, &c, 1);
         // append to dictionary buffer
-        buffer_append(lookahead, &c, 1);
         ringbuffer_append(dictionary, c);
     }
-    delete_buffer(lookahead);
-    delete_buffer(lookaheadNext);
+    delete_buffer(search);
     delete_ringbuffer(dictionary);
 }
 
@@ -63,9 +69,8 @@ Buffer *decodeLZSSPayloadBitLevel(BitArrayReader *reader, size_t decoded_length)
     if (!reader)
         err_quit("null pointer when decoding LZSS payload");
 
-    size_t total = 0;
     Buffer *output = new_buffer();
-    while (total < decoded_length) {
+    while (output->len < decoded_length) {
         int bit = 0;
 
         if (bitarrayreader_readBit(reader, &bit) < 1)
@@ -76,19 +81,17 @@ Buffer *decodeLZSSPayloadBitLevel(BitArrayReader *reader, size_t decoded_length)
             int distance = 0;
             int length = 0;
             if (readToken(reader, &distance, &length) < 16)
-                err_quit("unexpected end of file while reading payload");
+                err_quit("unexpected end of file while reading payload token");
             // copy string indicated by token
             if (distance > output->len || distance <= 0 || distance < length)
-                err_quit("token index out of bounds");
+                err_quit("token distance out of bounds");
             buffer_append(output, &output->data[output->len - distance], length);
-            total += length;
         } else {
             // token bit unset, next byte will be a literal
             unsigned char byte = 0;
             if (bitarrayreader_readByte(reader, &byte) < 8)
-                err_quit("unexpected end of file while reading payload");
+                err_quit("unexpected end of file while reading payload literal");
             buffer_append(output, &byte, 1);
-            total++;
         }
     }
 
@@ -100,9 +103,13 @@ int findMatch(RingBuffer *haystack, Buffer *needle)
     /*
      * find string needle from ringbuffer haystack in reverse, return distance
      * from buffer end
-     * length 
      */
 
+    if (!haystack || !needle)
+        err_quit("null pointer in findMatch");
+
+    if (needle->len < 1 || haystack->len < 1)
+        return -1;
     int distance;
     int length = 0;
     for (distance = 0; distance < haystack->len; distance++) {
@@ -130,24 +137,24 @@ void writeString(BitArray *dst, Buffer *src)
     }
 }
 
-void writeToken(BitArray *dst, int distance, int length)
+void writeToken(BitArray *dst, unsigned distance, unsigned length)
 {
     /*
-     * write LZSS reference token encoded in a 16-bit value
+     * write LZSS reference token encoded in a little-endian 16-bit value
      */
     if (!dst)
         err_quit("null pointer in writeToken");
     if ((distance >> TOKEN_DISTANCE_BITS) > 0)
-        err_quit("invalid token reference position");
+        err_quit("invalid reference token distance");
     if ((length >> TOKEN_LENGTH_BITS) > 0)
-        err_quit("invalid token reference distance");
+        err_quit("invalid reference token length");
+    uint32_t val = (distance << TOKEN_LENGTH_BITS) | length;
     bitarray_append(dst, 1); // mark the beginning of a token
-    int val = (distance << TOKEN_LENGTH_BITS) | length;
     bitarray_appendByte(dst, val & 0xff);
-    bitarray_appendByte(dst, val >> 8);
+    bitarray_appendByte(dst, (val & (~0xff)) >> 8);
 }
 
-int readToken(BitArrayReader *src, int *distance, int *length)
+int readToken(BitArrayReader *src, unsigned *distance, unsigned *length)
 {
     /*
      * read LZSS reference token
@@ -156,11 +163,11 @@ int readToken(BitArrayReader *src, int *distance, int *length)
         err_quit("null pointer in writeToken");
     int ret = 0;
     unsigned char temp;
-    int val;
+    unsigned val;
     ret += bitarrayreader_readByte(src, &temp);
-    val = temp << 8;
+    val = temp;
     ret += bitarrayreader_readByte(src, &temp);
-    val |= temp;
+    val |= (temp << 8);
     *distance = val >> TOKEN_LENGTH_BITS;
     *length = val & ((1 << TOKEN_LENGTH_BITS) - 1);
     return ret;

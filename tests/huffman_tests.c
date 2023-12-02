@@ -170,15 +170,15 @@ START_TEST(test_cacheHuffcodes)
     char code[MAX_LEAVES + 1] = {'\0'};
     cacheHuffcodes(abc, codes, code, 0);
 
-    BitArray *expected = new_bitarray_initl("0", 1);
+    BitArray *expected = new_bitarray_fromStringl("0", 1);
     ck_assert_ptr_nonnull(codes['a']);
     ck_assert_int_eq(bitarray_equals(codes['a'], expected), 1); 
     delete_bitarray(expected);
-    expected = new_bitarray_initl("10", 2);
+    expected = new_bitarray_fromStringl("10", 2);
     ck_assert_ptr_nonnull(codes['b']);
     ck_assert_int_eq(bitarray_equals(codes['b'], expected), 1); 
     delete_bitarray(expected);
-    expected = new_bitarray_initl("11", 2);
+    expected = new_bitarray_fromStringl("11", 2);
     ck_assert_ptr_nonnull(codes['c']);
     ck_assert_int_eq(bitarray_equals(codes['c'], expected), 1); 
     delete_bitarray(expected);
@@ -190,12 +190,12 @@ START_TEST(test_encodeHuffmanPayload)
     BitArray *codes[MAX_LEAVES + 1] = {NULL};
     Buffer *src = new_buffer();
     buffer_append(src, (unsigned char *)"aaabbc", 6);
-    codes['a'] = new_bitarray_initl("0", 1);
-    codes['b'] = new_bitarray_initl("10", 2);
-    codes['c'] = new_bitarray_initl("11", 2);
+    codes['a'] = new_bitarray_fromStringl("0", 1);
+    codes['b'] = new_bitarray_fromStringl("10", 2);
+    codes['c'] = new_bitarray_fromStringl("11", 2);
     BitArray *result = new_bitarray();
     encodeHuffmanPayload(src, result, codes);
-    BitArray *expected = new_bitarray_initl("000101011", 9);
+    BitArray *expected = new_bitarray_fromStringl("000101011", 9);
     ck_assert_int_eq(bitarray_equals(result, expected), 1);
     delete_bitarray(expected);
     delete_bitarray(result);
@@ -215,7 +215,7 @@ START_TEST(test_decodeHuffmanPayload)
     HuffNode *bc = huffnode_createParent(b, c);
     HuffNode *abc = huffnode_createParent(a, bc);
 
-    BitArray *src = new_bitarray_initl("000101011",9);
+    BitArray *src = new_bitarray_fromStringl("000101011",9);
     BitArrayReader *reader = bitarray_createReader(src);
     Buffer *decoded = decodeHuffmanPayload(reader, abc, 6);
     char *result = (char *)decoded->data;

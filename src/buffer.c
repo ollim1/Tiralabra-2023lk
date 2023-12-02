@@ -9,7 +9,7 @@ Buffer *new_buffer()
      * create an empty buffer with a BUFSIZE initial size
      */
     Buffer *ret = mmalloc(sizeof(Buffer));
-    unsigned char *data = mmalloc(BUFSIZE);
+    unsigned char *data = mcalloc(BUFSIZE, 1);
     ret->data = data;
     ret->size = BUFSIZE;
     ret->len = 0;
@@ -68,6 +68,33 @@ void buffer_pad(Buffer *buf, size_t len)
     }
     memset(buf->data + buf->len, 0, len);
     buf->len += len;
+}
+
+void buffer_truncate(Buffer *buf)
+{
+    /*
+     * truncate Buffer to only the last character
+     */
+    if (!buf)
+        err_quit("null pointer truncating buffer");
+    if (buf->len < 1)
+        return;
+    buf->data[0] = buf->data[buf->len - 1];
+    buf->len = 1;
+}
+
+void buffer_shrink(Buffer *buf)
+{
+    /*
+     * shrink buffer length by one
+     * boilerplate for better readability
+     */
+
+    if (!buf)
+        err_quit("null pointer truncating buffer");
+    if (buf->len < 1)
+        return;
+    buf->len--;
 }
 
 void buffer_append(Buffer *dest, unsigned char *src, size_t len)

@@ -210,9 +210,9 @@ END_TEST
 
 START_TEST(test_bitarray_concat)
 {
-    BitArray *a = new_bitarray_initl("01011", 5);
-    BitArray *b = new_bitarray_initl("10011", 5);
-    BitArray *ab = new_bitarray_initl("0101110011", 10);
+    BitArray *a = new_bitarray_fromStringl("01011", 5);
+    BitArray *b = new_bitarray_fromStringl("10011", 5);
+    BitArray *ab = new_bitarray_fromStringl("0101110011", 10);
 
     bitarray_concat(a, b);
     ck_assert_int_eq(bitarray_equals(a, ab), 1);
@@ -224,8 +224,8 @@ END_TEST
 
 START_TEST(test_bitarray_equals)
 {
-    BitArray *a = new_bitarray_initl("01011", 5);
-    BitArray *b = new_bitarray_initl("10011", 5);
+    BitArray *a = new_bitarray_fromStringl("01011", 5);
+    BitArray *b = new_bitarray_fromStringl("10011", 5);
 
     bitarray_concat(a, b);
     ck_assert_int_eq(bitarray_equals(a, a), 1);

@@ -7,7 +7,7 @@
 RingBuffer *new_ringbuffer(size_t size)
 {
     RingBuffer *ret = mmalloc(sizeof(RingBuffer));
-    ret->data = mmalloc(sizeof(size));
+    ret->data = mmalloc(size);
     ret->start = 0;
     ret->end = 0;
     ret->len = 0;
@@ -54,14 +54,14 @@ void ringbuffer_append(RingBuffer *dst, unsigned char val)
     if (!dst)
         err_quit("null pointer appending to ring buffer");
 
+    dst->data[dst->end] = val;
+    dst->end = (dst->end + 1) % dst->size;
     if (dst->len >= dst->size) {
         dst->start = (dst->start + 1) % dst->size;
         dst->len = dst->size;
     } else {
         dst->len++;
     }
-    dst->data[dst->end] = val;
-    dst->end = (dst->end + 1) % dst->size;
 }
 
 void ringbuffer_appendString(RingBuffer *dst, unsigned char *data, size_t len)
@@ -75,7 +75,7 @@ ssize_t calcRevIndex(RingBuffer *rb, size_t pos)
     if (!rb)
         err_quit("null pointer calculating ring buffer index");
 
-    if (pos > rb->len)
+    if (pos >= rb->len)
         err_quit("ring buffer index out of bounds");
 
     return (rb->start + rb->len - pos - 1) % rb->size;
@@ -86,7 +86,7 @@ ssize_t calcIndex(RingBuffer *rb, size_t pos)
     if (!rb)
         err_quit("null pointer calculating ring buffer index");
 
-    if (pos > rb->len)
+    if (pos >= rb->len)
         err_quit("ring buffer index out of bounds");
 
     return (rb->start + pos) % rb->size;

@@ -11,7 +11,7 @@ BitArray *new_bitarray()
     return ret;
 }
 
-BitArray *new_bitarray_initl(char *code, size_t maxLen)
+BitArray *new_bitarray_fromStringl(char *code, size_t maxLen)
 {
     /*
      * create BitArray and initialize it with code given as
@@ -87,6 +87,18 @@ Buffer *bitarray_toBuffer(BitArray *ba)
         err_quit("null pointer converting BitArray");
 
     return buffer_copyl(ba->data, (ba->len / 8) + 1);
+}
+
+char *bitarray_toString(BitArray *ba)
+{
+    if (!ba)
+        err_quit("null pointer converting BitArray to string");
+
+    char *str = mmalloc(ba->len + 1);
+    for (size_t i = 0; i < ba->len; i++)
+        str[i] = bitarray_get(ba, i) ? '1' : '0';
+    str[ba->len] = '\0';
+    return str;
 }
 
 void bitarray_concat(BitArray *a, BitArray *b)
