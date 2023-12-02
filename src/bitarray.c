@@ -35,6 +35,14 @@ void delete_bitarray(BitArray *ba)
     free(ba);
 }
 
+void delete_bitarrayPreserveContents(BitArray *ba)
+{
+    if (!ba)
+        err_quit("null pointer when deleting BitArray");
+
+    free(ba);
+}
+
 BitArray *bitarray_fromBuffer(Buffer *src)
 {
     /*
@@ -80,8 +88,8 @@ int bitarray_equals(BitArray *a, BitArray *b)
 Buffer *bitarray_toBuffer(BitArray *ba)
 {
     /*
-     * return the buffer from a BitArray
-     * for now, just return the Buffer object directly
+     * Produce a Buffer from a BitArray
+     * Copies the buffer, watch the memory usage!
      */
     if (!ba)
         err_quit("null pointer converting BitArray");

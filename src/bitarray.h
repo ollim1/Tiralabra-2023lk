@@ -18,6 +18,7 @@ typedef struct bitarrayreader_st {
 
 BitArray *new_bitarray();
 void delete_bitarray(BitArray *);
+void delete_bitarrayPreserveContents(BitArray *ba);
 void bitarray_set(BitArray *, int, size_t);
 BitArray *bitarray_copyl(BitArray *, size_t);
 BitArray *new_bitarray_fromStringl(char *code, size_t maxLen);

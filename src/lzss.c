@@ -13,8 +13,21 @@ Buffer *lzss_compress(Buffer *src)
      * Compresses Buffer using the LZSS (Lempel-Ziv-Storer-Szymanski algorithm.
      * Bit-level variant.
      */
-    Buffer *ret = new_buffer();
 
+    if (!src)
+        err_quit("null pointer in huffman_compress");
+    if (src->len == 0) {
+        fputs("file is empty, skipping compression\n", stderr);
+        return src;
+    }
+
+    BitArray *compressed = new_bitarray();
+    // write output length
+    bitarray_writeInteger(compressed, src->len);
+    encodeLZSSPayloadBitLevel(src, compressed);
+    Buffer *ret = compressed->data;
+
+    delete_bitarrayPreserveContents(compressed);
     return ret;
 }
 
@@ -31,7 +44,10 @@ void encodeLZSSPayloadBitLevel(Buffer *src, BitArray *dst)
     Buffer *search = new_buffer();
     Buffer *searchPrev = new_buffer();
     int searchIndexPrev = -1;
-    for (size_t i = 0; i < src->len; i++) {
+    size_t i;
+    size_t symbols_output = 0;
+
+    for (i = 0; i < src->len; i++) {
         // read byte from input
         unsigned char c = src->data[i];
         // append to search buffer
@@ -41,16 +57,19 @@ void encodeLZSSPayloadBitLevel(Buffer *src, BitArray *dst)
         // if a matching string is in the ring buffer, then check if the
         // previous search string was
         if (searchIndex == -1 || i == src->len - 1 || searchPrev->len == 15) {
-            if (i == src->len - 1 && searchIndex != -1)
+            if (i == src->len - 1 && searchIndex != -1) {
                 buffer_append(searchPrev, &c, 1);
+                searchIndexPrev = searchIndex;
+            }
 
             if (searchPrev->len > 1) {
-                int distance = searchIndexPrev;
+                int distance = searchIndexPrev - searchPrev->len + 1;
                 int length = searchPrev->len;
                 writeToken(dst, distance, length);
             } else {
                 writeString(dst, searchPrev);
             }
+            symbols_output += searchPrev->len;
             // clear search buffers when done
             buffer_clear(searchPrev);
             buffer_truncate(search);
@@ -60,6 +79,11 @@ void encodeLZSSPayloadBitLevel(Buffer *src, BitArray *dst)
         // append to dictionary buffer
         ringbuffer_append(dictionary, c);
     }
+    // if some symbols are still unencoded, append them to output
+    if (symbols_output < i && search->len > 0)
+        writeString(dst, search);
+
+    delete_buffer(searchPrev);
     delete_buffer(search);
     delete_ringbuffer(dictionary);
 }
@@ -74,16 +98,16 @@ Buffer *decodeLZSSPayloadBitLevel(BitArrayReader *reader, size_t decoded_length)
         int bit = 0;
 
         if (bitarrayreader_readBit(reader, &bit) < 1)
-            err_quit("unexpected end of file while reading payload");
+            err_quit("unexpected end of file while reading payload bit");
 
         if (bit == 1) {
             // token bit set, the next two bytes will contain a token
-            int distance = 0;
-            int length = 0;
+            unsigned distance = 0;
+            unsigned length = 0;
             if (readToken(reader, &distance, &length) < 16)
                 err_quit("unexpected end of file while reading payload token");
             // copy string indicated by token
-            if (distance > output->len || distance <= 0 || distance < length)
+            if (distance > output->len || distance < length)
                 err_quit("token distance out of bounds");
             buffer_append(output, &output->data[output->len - distance], length);
         } else {
@@ -140,7 +164,7 @@ void writeString(BitArray *dst, Buffer *src)
 void writeToken(BitArray *dst, unsigned distance, unsigned length)
 {
     /*
-     * write LZSS reference token encoded in a little-endian 16-bit value
+     * write LZSS reference token encoded in a big-endian 16-bit value
      */
     if (!dst)
         err_quit("null pointer in writeToken");
@@ -148,10 +172,11 @@ void writeToken(BitArray *dst, unsigned distance, unsigned length)
         err_quit("invalid reference token distance");
     if ((length >> TOKEN_LENGTH_BITS) > 0)
         err_quit("invalid reference token length");
-    uint32_t val = (distance << TOKEN_LENGTH_BITS) | length;
+    uint32_t val = (distance << TOKEN_LENGTH_BITS);
+    val |= length;
     bitarray_append(dst, 1); // mark the beginning of a token
+    bitarray_appendByte(dst, val >> 8);
     bitarray_appendByte(dst, val & 0xff);
-    bitarray_appendByte(dst, (val & (~0xff)) >> 8);
 }
 
 int readToken(BitArrayReader *src, unsigned *distance, unsigned *length)
@@ -165,12 +190,26 @@ int readToken(BitArrayReader *src, unsigned *distance, unsigned *length)
     unsigned char temp;
     unsigned val;
     ret += bitarrayreader_readByte(src, &temp);
-    val = temp;
+    val = temp << 8;
     ret += bitarrayreader_readByte(src, &temp);
-    val |= (temp << 8);
+    val |= temp;
     *distance = val >> TOKEN_LENGTH_BITS;
     *length = val & ((1 << TOKEN_LENGTH_BITS) - 1);
     return ret;
 }
 
-Buffer *lzss_extract(Buffer *src);
+Buffer *lzss_extract(Buffer *src)
+{
+    // turn Buffer into BitArray
+    BitArray *compressed = bitarray_fromBuffer(src);
+    // generate a reader from the bitarray
+    BitArrayReader *reader = bitarray_createReader(compressed);
+
+    size_t decoded_length = bitarrayreader_readInteger(reader);
+    Buffer *decompressed = decodeLZSSPayloadBitLevel(reader, decoded_length);
+
+    delete_bitarrayreader(reader);
+    delete_bitarrayPreserveContents(compressed);
+
+    return decompressed;
+}

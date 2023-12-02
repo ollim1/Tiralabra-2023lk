@@ -75,7 +75,6 @@ START_TEST(testEncodeLZSSPayload)
     bitarray_appendByte(expected, '.');
     bitarray_append(expected, 0);
     bitarray_appendByte(expected, ' ');
-    bitarray_append(expected, 1);
     writeToken(expected, 10, 9);
 
     ck_assert_str_eq(bitarray_toString(result), bitarray_toString(expected));
@@ -101,15 +100,11 @@ START_TEST(testDecodeLZSSPayload)
     bitarray_append(compressed, 0);
     bitarray_appendByte(compressed, 'S');
     // append token for "AM"stored in little-endian format
-    bitarray_append(compressed, 1);
-    int token = (4 << TOKEN_LENGTH_BITS) | 2;
-    bitarray_appendByte(compressed, token & 0xff);
-    bitarray_appendByte(compressed, token >> 8);
+    writeToken(compressed, 4, 2);
     bitarray_append(compressed, 0);
     bitarray_appendByte(compressed, '.');
     bitarray_append(compressed, 0);
     bitarray_appendByte(compressed, ' ');
-    bitarray_append(compressed, 1);
     writeToken(compressed, 10, 9);
     BitArrayReader *reader = bitarray_createReader(compressed);
     Buffer *decompressed = decodeLZSSPayloadBitLevel(reader, 19);
@@ -131,9 +126,29 @@ START_TEST(testWriteToken)
     bitarrayreader_readBit(reader, &bit);
     ck_assert_int_eq(bit, 1);
     bitarrayreader_readByte(reader, &byte);
-    ck_assert_int_eq(byte, 170);
-    bitarrayreader_readByte(reader, &byte);
     ck_assert_int_eq(byte, 0);
+    bitarrayreader_readByte(reader, &byte);
+    ck_assert_int_eq(byte, 170);
+}
+END_TEST
+
+START_TEST(testWriteToken2)
+{
+    BitArray *result = new_bitarray();
+    int distance_expected = 10;
+    int length_expected = 9;
+    writeToken(result, distance_expected, length_expected);
+    // 1 10101010 00000000
+    int bit = 0;
+    unsigned char byte = 0;
+    BitArray *expected = new_bitarray();
+    uint32_t val = (distance_expected << TOKEN_LENGTH_BITS);
+    val |= length_expected;
+    bitarray_append(expected, 1); // mark the beginning of a token
+    bitarray_appendByte(expected, (val & (~0xff)) >> 8);
+    bitarray_appendByte(expected, val & 0xff);
+
+    ck_assert_str_eq(bitarray_toString(result), bitarray_toString(expected));
 }
 END_TEST
 
@@ -173,6 +188,34 @@ START_TEST(testEncodeDecodeLZSSPayload)
 }
 END_TEST
 
+START_TEST(testEncodeDecodeLZSSPayload2)
+{
+    Buffer *src = new_buffer();
+    char *str = "fjowipaejfeo902380-29qui3r-f0efci0-eareqw-r";
+    size_t len = strlen(str) + 1;
+    buffer_append(src, (unsigned char *)str, len);
+    BitArray *ba = new_bitarray();
+    encodeLZSSPayloadBitLevel(src, ba);
+    BitArrayReader *reader = bitarray_createReader(ba);
+    Buffer *result = decodeLZSSPayloadBitLevel(reader, len);
+    ck_assert_mem_eq(result->data, src->data, len);
+}
+END_TEST
+
+START_TEST(testEncodeDecodeLZSSPayload3)
+{
+    Buffer *src = new_buffer();
+    char *str = "";
+    size_t len = strlen(str) + 1;
+    buffer_append(src, (unsigned char *)str, len);
+    BitArray *ba = new_bitarray();
+    encodeLZSSPayloadBitLevel(src, ba);
+    BitArrayReader *reader = bitarray_createReader(ba);
+    Buffer *result = decodeLZSSPayloadBitLevel(reader, len);
+    ck_assert_mem_eq(result->data, src->data, len);
+}
+END_TEST
+
 Suite *lzss_suite(void)
 {
     Suite *s;
@@ -184,9 +227,12 @@ Suite *lzss_suite(void)
     tcase_add_test(tc_core, testFindMatch3);
     tcase_add_test(tc_core, testReadWriteToken);
     tcase_add_test(tc_core, testWriteToken);
+    tcase_add_test(tc_core, testWriteToken2);
     tcase_add_test(tc_core, testEncodeLZSSPayload);
     tcase_add_test(tc_core, testDecodeLZSSPayload);
     tcase_add_test(tc_core, testEncodeDecodeLZSSPayload);
+    tcase_add_test(tc_core, testEncodeDecodeLZSSPayload2);
+    tcase_add_test(tc_core, testEncodeDecodeLZSSPayload3);
     suite_add_tcase(s, tc_core);
 
     return s;

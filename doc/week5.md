@@ -2,7 +2,8 @@
 
 - work on lzss
     - ring buffer
-    - stuck on writing token
+    - stuck on writing token for a few days
+    - mostly complete on 2.12., fails on files larger than a few kb
 - peer review
 
 ## Work Hours

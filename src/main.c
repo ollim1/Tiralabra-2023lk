@@ -1,6 +1,7 @@
 #include "error.h"
 #include "fileread.h"
 #include "huffman.h"
+#include "lzss.h"
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,6 +58,7 @@ int main(int argc, char **argv)
                 break;
             case LZSS:
                 fprintf(stderr, "using lzss algorithm\n");
+                processed = lzss_compress(data);
                 break;
             default:
                 break;
@@ -71,6 +73,7 @@ int main(int argc, char **argv)
                 break;
             case LZSS:
                 fprintf(stderr, "using lzss algorithm\n");
+                processed = lzss_extract(data);
                 break;
             default:
                 break;
