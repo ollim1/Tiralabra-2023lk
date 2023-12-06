@@ -1,10 +1,10 @@
-#include "lzss.h"
-#include "ealloc.h"
-#include "error.h"
-#include "lzss_private.h"
-#include "bitarray.h"
-#include "ringbuffer.h"
-#include "buffer.h"
+#include "../include/lzss.h"
+#include "../include/ealloc.h"
+#include "../include/error.h"
+#include "../include/lzss_private.h"
+#include "../include/bitarray.h"
+#include "../include/ringbuffer.h"
+#include "../include/buffer.h"
 #include <stdint.h>
 
 Buffer *lzss_compress(Buffer *src)

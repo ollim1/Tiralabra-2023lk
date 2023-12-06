@@ -1,5 +1,5 @@
-#include "buffer.h"
-#include "ealloc.h"
+#include "../include/buffer.h"
+#include "../include/ealloc.h"
 
 void buffer_resize(Buffer *buf, size_t new_size);
 

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include "error.h"
+#include "../include/error.h"
 
 void err_quit(const char *msg)
 {

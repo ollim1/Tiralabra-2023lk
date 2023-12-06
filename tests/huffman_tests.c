@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../src/huffman.h"
-#include "../src/huffman_private.h"
-#include "../src/huffnode.h"
-#include "../src/bitarray.h"
+#include "../include/huffman.h"
+#include "../include/huffman_private.h"
+#include "../include/huffnode.h"
+#include "../include/bitarray.h"
 
 START_TEST(test_init_hufftree)
 {

@@ -1,8 +1,8 @@
-#include "ealloc.h"
-#include "error.h"
-#include "stdlib.h"
-#include "ringbuffer.h"
-#include "ringbuffer_private.h"
+#include "../include/ealloc.h"
+#include "../include/error.h"
+#include "../include/stdlib.h"
+#include "../include/ringbuffer.h"
+#include "../include/ringbuffer_private.h"
 
 RingBuffer *new_ringbuffer(size_t size)
 {

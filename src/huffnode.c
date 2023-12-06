@@ -1,7 +1,7 @@
-#include "huffnode.h"
-#include "bitarray.h"
-#include "error.h"
-#include "ealloc.h"
+#include "../include/huffnode.h"
+#include "../include/bitarray.h"
+#include "../include/error.h"
+#include "../include/ealloc.h"
 
 int huffnode_compare(void *left, void *right)
 {

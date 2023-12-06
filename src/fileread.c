@@ -1,4 +1,4 @@
-#include "fileread.h"
+#include "../include/fileread.h"
 
 Buffer *readFile(char *filename)
 {

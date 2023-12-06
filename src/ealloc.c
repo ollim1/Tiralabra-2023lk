@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "error.h"
+#include "../include/error.h"
 
 void *mmalloc(size_t size)
 {

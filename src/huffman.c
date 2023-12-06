@@ -1,8 +1,8 @@
-#include "huffman.h"
-#include "huffman_private.h"
-#include "queue.h"
-#include "huffnode.h"
-#include "bitarray.h"
+#include "../include/huffman.h"
+#include "../include/huffman_private.h"
+#include "../include/queue.h"
+#include "../include/huffnode.h"
+#include "../include/bitarray.h"
 
 Buffer *huffman_compress(Buffer *src)
 {

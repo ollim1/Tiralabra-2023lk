@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../src/lzss_byte.h"
-#include "../src/lzss_byte_private.h"
-#include "../src/ringbuffer.h"
+#include "../include/lzss_byte.h"
+#include "../include/lzss_byte_private.h"
+#include "../include/ringbuffer.h"
 
 START_TEST(testDecodeLZSSPayload)
 {

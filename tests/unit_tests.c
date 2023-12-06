@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../src/bitarray.h"
-#include "../src/ringbuffer.h"
-#include "../src/buffer.h"
-#include "../src/queue.h"
+#include "../include/bitarray.h"
+#include "../include/ringbuffer.h"
+#include "../include/buffer.h"
+#include "../include/queue.h"
 
 /*
  * Tests for utility libraries

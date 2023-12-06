@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../src/lzss.h"
-#include "../src/lzss_private.h"
-#include "../src/ringbuffer.h"
-#include "../src/bitarray.h"
+#include "../include/lzss.h"
+#include "../include/lzss_private.h"
+#include "../include/ringbuffer.h"
+#include "../include/bitarray.h"
 
 START_TEST(testFindMatch1)
 {

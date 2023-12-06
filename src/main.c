@@ -1,8 +1,8 @@
-#include "error.h"
-#include "fileread.h"
-#include "huffman.h"
-#include "lzss.h"
-#include "lzss_byte.h"
+#include "../include/error.h"
+#include "../include/fileread.h"
+#include "../include/huffman.h"
+#include "../include/lzss.h"
+#include "../include/lzss_byte.h"
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>

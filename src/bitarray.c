@@ -1,5 +1,5 @@
-#include "bitarray.h"
-#include "ealloc.h"
+#include "../include/bitarray.h"
+#include "../include/ealloc.h"
 
 BitArray *new_bitarray()
 {

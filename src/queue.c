@@ -1,5 +1,5 @@
-#include "queue.h"
-#include "ealloc.h"
+#include "../include/queue.h"
+#include "../include/ealloc.h"
 
 PriorityQueue *new_queue(int (*compare)(void *, void *))
 {
