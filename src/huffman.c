@@ -34,6 +34,7 @@ Buffer *huffman_compress(Buffer *src)
     bitarray_writeInteger(output, src->len);
     // encode tree
     huffnode_serialize(tree, output);
+    fprintf(stderr, "size of serialized Huffman tree: %lu bits (%lu bytes)\n", output->len, output->len / 8 + 1);
     // encode payload
     encodeHuffmanPayload(src, output, codes);
 

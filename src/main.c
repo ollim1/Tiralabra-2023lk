@@ -2,6 +2,7 @@
 #include "fileread.h"
 #include "huffman.h"
 #include "lzss.h"
+#include "lzss_byte.h"
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,7 +15,7 @@ int main(int argc, char **argv)
 {
     int ch;
     char *infile = "-", *outfile = "-";
-    enum algorithm { HUFFMAN = 0, LZSS } algorithm = HUFFMAN;
+    enum algorithm { HUFFMAN = 0, LZSS, LZSS_BYTE } algorithm = HUFFMAN;
     enum mode { COMPRESS = 0, EXTRACT } mode = COMPRESS;
     if (argc == 1)
         usage();
@@ -26,6 +27,8 @@ int main(int argc, char **argv)
                 algorithm = HUFFMAN;
             } else if (strcmp(optarg, "lzss") == 0) {
                 algorithm = LZSS;
+            } else if (strcmp(optarg, "lzss-byte") == 0) {
+                algorithm = LZSS_BYTE;
             } else
                 fprintf(stderr, "Unknown algorithm: %s\n", optarg);
             break;
@@ -60,6 +63,10 @@ int main(int argc, char **argv)
                 fprintf(stderr, "using lzss algorithm\n");
                 processed = lzss_compress(data);
                 break;
+            case LZSS_BYTE:
+                fprintf(stderr, "using lzss-byte algorithm\n");
+                processed = lzss_byte_compress(data);
+                break;
             default:
                 break;
         }
@@ -74,6 +81,10 @@ int main(int argc, char **argv)
             case LZSS:
                 fprintf(stderr, "using lzss algorithm\n");
                 processed = lzss_extract(data);
+                break;
+            case LZSS_BYTE:
+                fprintf(stderr, "using lzss-byte algorithm\n");
+                processed = lzss_byte_extract(data);
                 break;
             default:
                 break;

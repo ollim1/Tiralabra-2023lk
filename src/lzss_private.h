@@ -3,8 +3,8 @@
 #include "bitarray.h"
 #include "ringbuffer.h"
 #define WINDOW_SIZE 4096 // size of dictionary window
-#define TOKEN_DISTANCE_BITS 12 // amount of bits for distance of reference from current position
-#define TOKEN_LENGTH_BITS 4 // amount of bits for length of reference
+#define TOKEN_DISTANCE_BITS 12 // amount of bits for distance of reference from current position (max value 4095
+#define TOKEN_LENGTH_BITS 4 // amount of bits for length of reference (max value 15)
 
 int findMatch(RingBuffer *haystack, Buffer *needle);
 void writeToken(BitArray *dst, unsigned distance, unsigned length);

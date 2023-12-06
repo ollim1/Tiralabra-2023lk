@@ -15,6 +15,10 @@ typedef struct buffer_st {
     size_t size;
     unsigned char *data;
 } Buffer;
+typedef struct bufferReader_st {
+    Buffer *data;
+    size_t pos;
+} BufferReader;
 
 Buffer *new_buffer();
 void delete_buffer(Buffer *);
@@ -26,5 +30,9 @@ void buffer_truncate(Buffer *buf);
 void buffer_append(Buffer *, unsigned char *, size_t);
 void buffer_shrink(Buffer *buf);
 void buffer_clear(Buffer *buf);
+BufferReader *buffer_createReader(Buffer *buffer);
+void delete_bufferreader(BufferReader *reader);
+ssize_t bufferreader_read(BufferReader *reader, unsigned char *dst, size_t len);
+int bufferreader_isFinal(BufferReader *reader);
 
 #endif

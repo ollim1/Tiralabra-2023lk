@@ -56,15 +56,18 @@ void encodeLZSSPayloadBitLevel(Buffer *src, BitArray *dst)
 
         // if a matching string is in the ring buffer, then check if the
         // previous search string was
-        if (searchIndex == -1 || i == src->len - 1 || searchPrev->len == 15) {
+        if (searchPrev->len == 15 || searchIndex == -1 || i == src->len - 1) {
             if (i == src->len - 1 && searchIndex != -1) {
                 buffer_append(searchPrev, &c, 1);
                 searchIndexPrev = searchIndex;
             }
 
-            if (searchPrev->len > 1) {
-                int distance = searchIndexPrev - searchPrev->len + 1;
-                int length = searchPrev->len;
+            int distance = searchIndexPrev - searchPrev->len + 1;
+            int length = searchPrev->len;
+            if (length > 2 && distance >= length) {
+                // unsigned char tmpstr[20] = {0};
+                // memcpy(tmpstr, searchPrev->data, searchPrev->len);
+                // fprintf(stderr, "writing token (%4d,%3d): %-20s\n", distance, length, tmpstr);
                 writeToken(dst, distance, length);
             } else {
                 writeString(dst, searchPrev);
@@ -107,8 +110,10 @@ Buffer *decodeLZSSPayloadBitLevel(BitArrayReader *reader, size_t decoded_length)
             if (readToken(reader, &distance, &length) < 16)
                 err_quit("unexpected end of file while reading payload token");
             // copy string indicated by token
-            if (distance > output->len || distance < length)
+            if (distance > output->len || distance < length) {
+                fprintf(stderr, "distance:%5u, length:%3u, file length: %luB\n", distance, length, output->len);
                 err_quit("token distance out of bounds");
+            }
             buffer_append(output, &output->data[output->len - distance], length);
         } else {
             // token bit unset, next byte will be a literal
@@ -136,12 +141,14 @@ int findMatch(RingBuffer *haystack, Buffer *needle)
         return -1;
     int distance;
     int length = 0;
-    for (distance = 0; distance < haystack->len; distance++) {
+    for (distance = 0; distance < haystack->len && distance < WINDOW_SIZE; distance++) {
         unsigned char c = ringbuffer_getRev(haystack, distance);
-        if (c == needle->data[needle->len - length - 1])
+        if (c == needle->data[needle->len - length - 1]) {
             length++;
-        else
+        } else {
+            distance -= length - 1;
             length = 0;
+        }
         if (length >= needle->len)
             return distance + 1;
     }
@@ -172,6 +179,10 @@ void writeToken(BitArray *dst, unsigned distance, unsigned length)
         err_quit("invalid reference token distance");
     if ((length >> TOKEN_LENGTH_BITS) > 0)
         err_quit("invalid reference token length");
+    if (distance < length) {
+        fprintf(stderr, "distance:%5u, length:%3u\n", distance, length);
+        err_quit("invalid reference token distance");
+    }
     uint32_t val = (distance << TOKEN_LENGTH_BITS);
     val |= length;
     bitarray_append(dst, 1); // mark the beginning of a token

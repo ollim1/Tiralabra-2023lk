@@ -4,7 +4,7 @@
     - ring buffer
     - stuck on writing token for a few days
     - mostly complete on 2.12., fails on files larger than a few kb
-    - will attempt to move to byte level implementation, possibly with 3-byte escaped tokens
+    - will attempt to move to byte level implementation, with 3-byte escaped tokens
 - peer review
 
 ## Work Hours

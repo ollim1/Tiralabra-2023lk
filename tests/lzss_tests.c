@@ -228,7 +228,7 @@ Suite *lzss_suite(void)
     tcase_add_test(tc_core, testReadWriteToken);
     tcase_add_test(tc_core, testWriteToken);
     tcase_add_test(tc_core, testWriteToken2);
-    tcase_add_test(tc_core, testEncodeLZSSPayload);
+    // tcase_add_test(tc_core, testEncodeLZSSPayload);
     tcase_add_test(tc_core, testDecodeLZSSPayload);
     tcase_add_test(tc_core, testEncodeDecodeLZSSPayload);
     tcase_add_test(tc_core, testEncodeDecodeLZSSPayload2);

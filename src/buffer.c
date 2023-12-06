@@ -129,3 +129,41 @@ void buffer_clear(Buffer *buf)
         err_quit("null pointer in buffer_clear");
     buf->len = 0;
 }
+
+BufferReader *buffer_createReader(Buffer *buffer)
+{
+    if (!buffer)
+        err_quit("null pointer creating BufferReader");
+
+    BufferReader *ret = mmalloc(sizeof(BufferReader));
+    ret->data = buffer;
+    ret->pos = 0;
+    return ret;
+}
+
+void delete_bufferreader(BufferReader *reader)
+{
+    if (reader)
+        free(reader);
+}
+
+ssize_t bufferreader_read(BufferReader *reader, unsigned char *dst, size_t len)
+{
+    if (!reader || !dst)
+        err_quit("null pointer on bufferreader_read");
+    ssize_t total;
+    if (reader->pos >= reader->data->len)
+        return -1;
+    for (total = 0; total < len && reader->pos < reader->data->len; total++, reader->pos++) {
+        dst[total] = reader->data->data[reader->pos];
+    }
+    return total;
+}
+
+int bufferreader_isFinal(BufferReader *reader)
+{
+    if (!reader)
+        err_quit("null pointer on bufferreader_isFinished");
+
+    return reader->pos >= reader->data->len;
+}
