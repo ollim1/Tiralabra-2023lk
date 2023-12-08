@@ -346,6 +346,16 @@ START_TEST(test_bitarray_set_get_byte)
     ck_assert_int_eq(bitarray_getByte(ba, 0), 'a');
 
     delete_bitarray(ba);
+    ba = new_bitarray();
+    bitarray_append(ba, 1);
+    bitarray_append(ba, 0);
+    bitarray_append(ba, 1);
+    bitarray_appendByte(ba, 'a');
+
+    ck_assert_int_eq(ba->len, 11);
+    ck_assert_int_eq(bitarray_getByte(ba, 3), 'a');
+
+    delete_bitarray(ba);
 }
 END_TEST
 
@@ -355,18 +365,6 @@ START_TEST(test_bitarray_toBuffer)
     bitarray_appendString(ba, (unsigned char *) "abc", 32);
     Buffer *result = bitarray_toBuffer(ba);
     ck_assert_int_eq(strncmp((unsigned char *)result->data, "abc", 4), 0);
-}
-END_TEST
-
-START_TEST(test_bitarray_appendZeroLength)
-{
-    BitArray *ba = new_bitarray();
-
-    char *test = "";
-    bitarray_appendString(ba, test, 0);
-    ck_assert_int_eq(ba->len, 0);
-
-    delete_bitarray(ba);
 }
 END_TEST
 
@@ -381,7 +379,6 @@ Suite *bitarray_suite(void)
     tcase_add_test(tc_core, test_bitarray_set_get);
     tcase_add_test(tc_core, test_bitarray_append);
     tcase_add_test(tc_core, test_bitarray_appendstring);
-    tcase_add_test(tc_core, test_bitarray_appendZeroLength);
     tcase_add_test(tc_core, test_bitarray_set_get_byte);
     tcase_add_test(tc_core, test_bitarray_writeInteger);
     tcase_add_test(tc_core, test_bitarrayreader_readInteger);

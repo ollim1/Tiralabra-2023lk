@@ -36,6 +36,7 @@ void bitarray_append(BitArray *, int);
 void bitarray_appendByte(BitArray *, unsigned char);
 void bitarray_appendString(BitArray *, unsigned char *, size_t len);
 void bitarray_setString(BitArray *, unsigned char *, size_t len, size_t pos);
+void bitarray_setByte(BitArray *dst, unsigned char value, size_t pos);
 void bitarray_pad(BitArray *, size_t);
 int bitarray_get(BitArray *, size_t);
 unsigned char bitarray_getByte(BitArray *, size_t);

@@ -168,7 +168,9 @@ void bitarray_appendByte(BitArray *dst, unsigned char byte)
     if (!dst)
         err_quit("null pointer when appending bit string to BitArray");
 
-    bitarray_appendString(dst, &byte, 8);
+    size_t pos = dst->len;
+    bitarray_pad(dst, 8);
+    bitarray_setByte(dst, byte, pos);
 }
 
 void bitarray_appendString(BitArray *dst, unsigned char *src, size_t len)
@@ -179,12 +181,17 @@ void bitarray_appendString(BitArray *dst, unsigned char *src, size_t len)
     if (!dst)
         err_quit("null pointer when appending bit string to BitArray");
 
+    size_t pos = dst->len;
+    bitarray_pad(dst, len);
+    bitarray_setString(dst, src, len, pos);
+    /*
     for (size_t i = 0; i < len; i++) {
         int byte = i / 8;
         int offset = i % 8;
         unsigned char bit = (src[byte] & (1 << offset)) > 0;
         bitarray_append(dst, bit);
     }
+    */
 }
 
 void bitarray_setString(BitArray *dst, unsigned char *src, size_t len, size_t pos)
@@ -195,11 +202,48 @@ void bitarray_setString(BitArray *dst, unsigned char *src, size_t len, size_t po
     if (!dst)
         err_quit("null pointer when appending bit string to BitArray");
 
-    for (size_t i = 0; i < len; i++) {
-        int byte = i / 8;
-        int offset = i % 8;
+    if (len < 1)
+        err_quit("invalid length in bitarray_setString");
+    if (pos + len > dst->len)
+        err_quit("index out of bounds in bitarray_setString");
+
+    int offset = pos % 8;
+    size_t i = 0;
+    size_t floor = len - (len % 8);
+
+    if (offset == 0) {
+        memcpy(&dst->data->data[pos / 8], src, len / 8);
+        i += floor;
+    } else {
+        for (; i < floor; i += 8) {
+            bitarray_setByte(dst, src[i / 8], pos + i);
+        }
+    }
+    for (; i < len; i++) {
+        size_t byte = i / 8;
+        size_t offset = i % 8;
         unsigned char bit = (src[byte] & (1 << offset)) > 0;
         bitarray_set(dst, bit, pos++);
+    }
+}
+
+void bitarray_setByte(BitArray *dst, unsigned char value, size_t pos)
+{
+    if (!dst)
+        err_quit("null pointer when setting byte in BitArray");
+    if (pos + 8 > dst->len)
+        err_quit("BitArray index out of bounds when setting byte");
+
+    int offset = pos % 8;
+    int byte = pos / 8;
+    if (offset == 0) {
+        dst->data->data[pos / 8] = value;
+    } else {
+        unsigned char mask = (1 << offset) - 1;
+        dst->data->data[byte] &= mask;
+        dst->data->data[byte] |= (value << offset);
+        dst->data->data[byte + 1] &= ~mask;
+        dst->data->data[byte + 1] |= (value >> (8 - offset));
     }
 }
 
@@ -222,18 +266,26 @@ unsigned char bitarray_getByte(BitArray *src, size_t pos)
 {
     /*
      * read an 8 bit sequence from BitArray
+     * optimized using bitshift operations
      */
     if (!src)
         err_quit("null pointer when reading byte from BitArray");
     if (pos + 8 > src->len)
         err_quit("BitArray index out of bounds when reading byte");
 
-    unsigned char ret = 0;
-    for (size_t i = 0; i < 8; i++) {
-        int bit = bitarray_get(src, pos + i);
-        ret |= (bit << i);
+    unsigned char value = 0;
+    int offset = pos % 8;
+    if (offset == 0) {
+        value = src->data->data[pos / 8];
+    } else {
+        int byte1 = src->data->data[pos / 8];
+        int byte2 = src->data->data[pos / 8 + 1];
+        unsigned char mask = (1 << offset) - 1;
+        value = (byte1 & ~mask) >> offset;
+        value |= (byte2 & mask) << (8 - offset);
     }
-    return ret;
+
+    return value;
 }
 
 void bitarray_pad(BitArray *ba, size_t len)
