@@ -1,6 +1,10 @@
 #include "../include/bitarray.h"
 #include "../include/ealloc.h"
 
+/**
+ * Allocates and initializes a new BitArray.
+ * @return the newly created BitArray
+ */
 BitArray *new_bitarray()
 {
     BitArray *ret = mmalloc(sizeof(BitArray));
@@ -11,12 +15,14 @@ BitArray *new_bitarray()
     return ret;
 }
 
+/**
+ * Create BitArray and initialize it with string of ones and zeroes.
+ * @param code the code from which to initialized the BitArray
+ * @param maxLen maximum length of code
+ * @return the newly created BitArray
+ */
 BitArray *new_bitarray_fromStringl(char *code, size_t maxLen)
 {
-    /*
-     * create BitArray and initialize it with code given as
-     * string consisting of ones and zeroes, limit size to maxLen
-     */
     BitArray *ret = new_bitarray();
     for (size_t i = 0; i < maxLen && code[i]; i++) {
         if (code[i] != '0' && code[i] != '1')
@@ -26,6 +32,10 @@ BitArray *new_bitarray_fromStringl(char *code, size_t maxLen)
     return ret;
 }
 
+/**
+ * Frees memory allocated for BitArray.
+ * @params ba the BitArray to delete
+ */
 void delete_bitarray(BitArray *ba)
 {
     if (!ba)
@@ -35,6 +45,11 @@ void delete_bitarray(BitArray *ba)
     free(ba);
 }
 
+/**
+ * Frees memory allocated for BitArray while preserving contents.
+ * Boilerplate for better readability.
+ * @param ba the BitArray to delete
+ */
 void delete_bitarrayPreserveContents(BitArray *ba)
 {
     if (!ba)
@@ -43,11 +58,13 @@ void delete_bitarrayPreserveContents(BitArray *ba)
     free(ba);
 }
 
+/**
+ * Turns a Buffer into a BitArray.
+ * @param src buffer to encapsulate
+ * @return the newly created BitArray
+ */
 BitArray *bitarray_fromBuffer(Buffer *src)
 {
-    /*
-     * turns a Buffer into a BitArray
-     */
     if (!src)
         err_quit("null pointer when converting Buffer to BitArray");
 
@@ -57,21 +74,30 @@ BitArray *bitarray_fromBuffer(Buffer *src)
     return ret;
 }
 
-BitArray *bitarray_copyl(BitArray *ba, size_t len)
+/**
+ * Copy bits from src to a new BitArray.
+ * @param src the source BitArray
+ * @param len the desired maximum length of the new BitArray
+ * @return the newly created BitArray
+ */
+BitArray *bitarray_copyl(BitArray *src, size_t len)
 {
-    /*
-     * copy len bits from ba to a new BitArray
-     */
-    if (!ba)
+    if (!src)
         err_quit("null pointer when setting BitArray bit");
-    if (len > ba->len)
+    if (len > src->len)
         err_quit("tried to copy more bits that source BitArray contains");
 
     BitArray *ret = new_bitarray();
-    bitarray_concatl(ret, ba, len);
+    bitarray_concatl(ret, src, len);
     return ret;
 }
 
+/**
+ * Compare the contents of two BitArrays.
+ * @param a the first BitArray
+ * @param a the second BitArray
+ * @return 1 if BitArrays are the same, 0 if not
+ */
 int bitarray_equals(BitArray *a, BitArray *b)
 {
     if (!a || !b)
@@ -85,41 +111,56 @@ int bitarray_equals(BitArray *a, BitArray *b)
     return 1;
 }
 
-Buffer *bitarray_toBuffer(BitArray *ba)
+/**
+ * Produce a Buffer from a BitArray by copying the internal buffer. Does not
+ * preserve BitArray length.
+ * @param src the BitArray from which to extract a Buffer
+ * @return the newly created Buffer
+ */
+Buffer *bitarray_toBuffer(BitArray *src)
 {
-    /*
-     * Produce a Buffer from a BitArray
-     * Copies the buffer, watch the memory usage!
-     */
-    if (!ba)
+    if (!src)
         err_quit("null pointer converting BitArray");
 
-    return buffer_copyl(ba->data, (ba->len / 8) + 1);
+    return buffer_copyl(src->data, (src->len / 8) + 1);
 }
 
-char *bitarray_toString(BitArray *ba)
+/**
+ * Convert BitArray to string of signed char. Mostly used for debugging purposes.
+ * @param src the source BitArray
+ * @return a string with the contents of the BitArray verbatim
+ */
+char *bitarray_toString(BitArray *src)
 {
-    if (!ba)
+    if (!src)
         err_quit("null pointer converting BitArray to string");
 
-    char *str = mmalloc(ba->len + 1);
-    for (size_t i = 0; i < ba->len; i++)
-        str[i] = bitarray_get(ba, i) ? '1' : '0';
-    str[ba->len] = '\0';
+    char *str = mmalloc(src->len + 1);
+    for (size_t i = 0; i < src->len; i++)
+        str[i] = bitarray_get(src, i) ? '1' : '0';
+    str[src->len] = '\0';
     return str;
 }
 
+/**
+ * Concatenate BitArrays a and b.
+ * @param a the destination BitArray
+ * @param b the BitArray to append to a
+ */
 void bitarray_concat(BitArray *a, BitArray *b)
 {
-    /*
-     * concatenate BitArrays a and b
-     */
     if (!a || !b)
         err_quit("null pointer when concatenating BitArrays");
     
     bitarray_concatl(a, b, b->len);
 }
 
+/**
+ * Concatenate BitArrays a and b, with length limit
+ * @param a the destination BitArray
+ * @param b the BitArray to append to a
+ * @param len the maximum amount of bits to append
+ */
 void bitarray_concatl(BitArray *a, BitArray *b, size_t len)
 {
     /*
@@ -131,40 +172,50 @@ void bitarray_concatl(BitArray *a, BitArray *b, size_t len)
     bitarray_appendString(a, b->data->data, (len < b->len ? len : b->len));
 }
 
-void bitarray_set(BitArray *ba, int val, size_t pos)
+/**
+ * Set BitArray bit.
+ * @param dst the BitArray to modify
+ * @param val the binary value of the bit
+ * @param pos the position of the bit to set
+ */
+void bitarray_set(BitArray *dst, int val, size_t pos)
 {
-    /*
-     * set BitArray bit at bit position pos
-     */
-    if (!ba)
+    if (!dst)
         err_quit("null pointer when setting BitArray bit");
-    if (pos >= ba->len)
+    if (pos >= dst->len)
         err_quit("tried to set bit outside BitArray bounds");
 
     unsigned char bit = val > 0; // normalize val to 1
     size_t byte = pos / 8;
     size_t offset = pos % 8;
 
-    ba->data->data[byte] &= ~(1 << offset);  // clear bit for writing
-    ba->data->data[byte] |= (bit << offset); // set bit value
+    dst->data->data[byte] &= ~(1 << offset);  // clear bit for writing
+    dst->data->data[byte] |= (bit << offset); // set bit value
 }
 
-void bitarray_append(BitArray *ba, int val)
+/**
+ * Append bit value to BitArray.
+ * @param dst the BitArray to modify
+ * @param val the binary value of the bit to append
+ */
+void bitarray_append(BitArray *dst, int val)
 {
-    if (!ba)
+    if (!dst)
         err_quit("null pointer when appending BitArray bit");
-    if (ba->len % 8 == 0)
-        buffer_pad(ba->data, 1);
+    if (dst->len % 8 == 0)
+        buffer_pad(dst->data, 1);
 
-    ba->len++;
-    bitarray_set(ba, val, ba->len - 1);
+    dst->len++;
+    bitarray_set(dst, val, dst->len - 1);
 }
 
+/**
+ * Append a byte to BitArray.
+ * @param dst the BitArray to modify
+ * @param byte the byte value to append to dst
+ */
 void bitarray_appendByte(BitArray *dst, unsigned char byte)
 {
-    /*
-     * append a string of bits to BitArray
-     */
     if (!dst)
         err_quit("null pointer when appending bit string to BitArray");
 
@@ -173,32 +224,31 @@ void bitarray_appendByte(BitArray *dst, unsigned char byte)
     bitarray_setByte(dst, byte, pos);
 }
 
+/**
+ * Append a string of bits to BitArray.
+ * @param dst the BitArray to modify
+ * @param src the source string, written as is
+ * @param len the length of the string
+ */
 void bitarray_appendString(BitArray *dst, unsigned char *src, size_t len)
 {
-    /*
-     * append a string of bits to BitArray
-     */
     if (!dst)
         err_quit("null pointer when appending bit string to BitArray");
 
     size_t pos = dst->len;
     bitarray_pad(dst, len);
     bitarray_setString(dst, src, len, pos);
-    /*
-    for (size_t i = 0; i < len; i++) {
-        int byte = i / 8;
-        int offset = i % 8;
-        unsigned char bit = (src[byte] & (1 << offset)) > 0;
-        bitarray_append(dst, bit);
-    }
-    */
 }
 
+/**
+ * Set a string of bits in BitArray.
+ * @param dst the BitArray to modify
+ * @param src the source string, written as is
+ * @param len the length of the string
+ * @param pos the desired starting position of the string in the destination BitArray
+ */
 void bitarray_setString(BitArray *dst, unsigned char *src, size_t len, size_t pos)
 {
-    /*
-     * append a string of bits to BitArray
-     */
     if (!dst)
         err_quit("null pointer when appending bit string to BitArray");
 
@@ -227,6 +277,13 @@ void bitarray_setString(BitArray *dst, unsigned char *src, size_t len, size_t po
     }
 }
 
+/**
+ * Set a byte in BitArray.
+ * @param dst the BitArray to modify
+ * @param value byte to be written
+ * @param len the length of the string
+ * @param pos the desired starting position of the byte in the destination BitArray
+ */
 void bitarray_setByte(BitArray *dst, unsigned char value, size_t pos)
 {
     if (!dst)
@@ -247,27 +304,32 @@ void bitarray_setByte(BitArray *dst, unsigned char value, size_t pos)
     }
 }
 
-int bitarray_get(BitArray *ba, size_t pos)
+/**
+ * Read a single bit from BitArray.
+ * @param src the source BitArray
+ * @param pos the position of the bit to retrieve in the BitArray
+ * @return the bit value to be returned
+ */
+int bitarray_get(BitArray *src, size_t pos)
 {
-    /*
-     * read single bit from BitArray
-     */
-    if (!ba)
+    if (!src)
         err_quit("null pointer when appending BitArray bit");
-    if (pos >= ba->len)
+    if (pos >= src->len)
         err_quit("tried to read outside BitArray bounds");
 
     size_t byte = pos / 8;
     size_t offset = pos % 8;
-    return (ba->data->data[byte] & (1 << offset)) > 0;
+    return (src->data->data[byte] & (1 << offset)) > 0;
 }
 
+/**
+ * Read an 8 bit sequence from BitArray
+ * @param src the source BitArray
+ * @param pos the position of the byte to retrieve in the BitArray
+ * @return the byte value to be returned
+ */
 unsigned char bitarray_getByte(BitArray *src, size_t pos)
 {
-    /*
-     * read an 8 bit sequence from BitArray
-     * optimized using bitshift operations
-     */
     if (!src)
         err_quit("null pointer when reading byte from BitArray");
     if (pos + 8 > src->len)
@@ -288,22 +350,24 @@ unsigned char bitarray_getByte(BitArray *src, size_t pos)
     return value;
 }
 
-void bitarray_pad(BitArray *ba, size_t len)
+/**
+ * Pad BitArray with zeroes
+ * @param arr the array to modify
+ * @param len the amount of zeroes to append
+ */
+void bitarray_pad(BitArray *arr, size_t len)
 {
-    /*
-     * pad BitArray by len bits
-     */
-    if (!ba)
+    if (!arr)
         err_quit("null pointer when padding BitArray");
 
-    buffer_pad(ba->data, len / 8 + 1);
-    ba->len += len;
+    buffer_pad(arr->data, len / 8 + 1);
+    arr->len += len;
 }
 
-BitArrayReader *bitarray_createReader(BitArray *ba)
+BitArrayReader *bitarray_createReader(BitArray *dst)
 {
     BitArrayReader *ret = mmalloc(sizeof(BitArrayReader));
-    ret->data = ba;
+    ret->data = dst;
     ret->pos = 0;
     return ret;
 }
