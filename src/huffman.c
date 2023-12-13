@@ -4,16 +4,18 @@
 #include "../include/huffnode.h"
 #include "../include/bitarray.h"
 
+/**
+ * compresses a Buffer using the Huffman algorithm.
+ * 1. frequency counting:
+ * 2. tree building and encoding
+ *      - encode tree using depth first recursion:
+ *      b:(cccccccc) where b is the leaf bit and c are character bits
+ * 3. character encoding
+ * @param src the source buffer to compress
+ * @return compressed version of the given buffer
+ */
 Buffer *huffman_compress(Buffer *src)
 {
-    /*
-     * compresses a Buffer using the Huffman algorithm.
-     * 1. frequency counting:
-     * 2. tree building and encoding
-     *      - encode tree using depth first recursion:
-     *      b:(cccccccc) where b is the leaf bit and c are character bits
-     * 3. character encoding
-     */
     // building tree
     if (!src)
         err_quit("null pointer in huffman_compress");
@@ -48,6 +50,12 @@ Buffer *huffman_compress(Buffer *src)
     return ret;
 }
 
+/**
+ * Encode compressed payload. Uses a code table to fetch codes matching byte values.
+ * @param the source buffer to encode
+ * @param dst the destination BitArray to which to write the compressed output
+ * @param codes the pointer to the Huffman code table, containing tree paths
+ */
 void encodeHuffmanPayload(Buffer *src, BitArray *dst, BitArray **codes)
 {
     if (!src || !dst || !codes)
@@ -62,16 +70,17 @@ void encodeHuffmanPayload(Buffer *src, BitArray *dst, BitArray **codes)
     }
 }
 
-
+/**
+ * Building Huffman tree:
+ * - calculate frequencies of each symbol
+ * - push frequency-value pairs into min heap as leaf nodes
+ * - pop two nodes and push a new internal node pointing to the two leaf
+ *   nodes into heap, smaller on the left
+ * @params src the source Buffer
+ * @return the Huffman tree built using the Buffer
+ */
 HuffNode *buildHufftree(Buffer *src)
 {
-    /*
-     * Building Huffman tree:
-     * - calculate frequencies of each symbol
-     * - push frequency-value pairs into min heap as leaf nodes
-     * - pop two nodes and push a new internal node pointing to the two leaf
-     *   nodes into heap, smaller on the left
-     */
     size_t freqs[MAX_LEAVES] = {0}; // frequency of every 8-bit integer value
     for (size_t i = 0; i < src->len; i++) {
         freqs[(int)src->data[i]]++;
@@ -97,13 +106,15 @@ HuffNode *buildHufftree(Buffer *src)
     return root;
 }
 
+/**
+ * Cache Huffman tree nodes into a lookup table using a depth-first search.
+ * @param node the Huffman tree to traverse
+ * @param codes the destination code table
+ * @param code string containing current code in '0' and '1' char literals
+ * @param depth current depth
+ */
 void cacheHuffcodes(HuffNode *node, BitArray **codes, char *code, int depth)
 {
-    /*
-     * cache Huffman tree nodes into easily searchable arrays for encoding
-     * takes a preallocated BitArray of MAX_LEAVES length as traversals can be
-     * MAX_LEAVES bits long
-     */
     if (!node)
         return;
 
@@ -118,6 +129,14 @@ void cacheHuffcodes(HuffNode *node, BitArray **codes, char *code, int depth)
     cacheHuffcodes(node->right, codes, code, depth + 1);
 }
 
+/**
+ * Decode Huffman payload. Traverses Huffman tree according to bit values from
+ * Huffman encoded input.
+ * @param reader BitArrayReader, reused from earlier steps
+ * @param tree Huffman tree to use for decoding
+ * @param decoded_length the original size of the uncompressed file in bytes
+ * @return decoded data
+ */
 Buffer *decodeHuffmanPayload(BitArrayReader *reader, HuffNode *tree, size_t decoded_length)
 {
     if (!reader || !tree)
@@ -143,6 +162,11 @@ Buffer *decodeHuffmanPayload(BitArrayReader *reader, HuffNode *tree, size_t deco
     return output;
 }
 
+/**
+ * Decompress Huffman compressed Buffer.
+ * @param src compressed input
+ * @return decompressed Buffer
+ */
 Buffer *huffman_extract(Buffer *src)
 {
     if (src->len == 0) {

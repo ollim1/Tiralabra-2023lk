@@ -3,11 +3,12 @@
 
 void buffer_resize(Buffer *buf, size_t new_size);
 
+/**
+ * Create an empty buffer with a BUFSIZE initial size
+ * @return the newly created Buffer
+ */
 Buffer *new_buffer()
 {
-    /*
-     * create an empty buffer with a BUFSIZE initial size
-     */
     Buffer *ret = mmalloc(sizeof(Buffer));
     unsigned char *data = mcalloc(BUFSIZE, 1);
     ret->data = data;
@@ -16,11 +17,12 @@ Buffer *new_buffer()
     return ret;
 }
 
+/**
+ * Delete buffer, ignoring any any pointers contained within its elements
+ * @param buf the Buffer to delete
+ */
 void delete_buffer(Buffer *buf)
 {
-    /*
-     * delete buffer, ignoring any any pointers contained within its elements
-     */
     if (buf) {
         if (buf->data)
             free(buf->data);
@@ -28,34 +30,39 @@ void delete_buffer(Buffer *buf)
     }
 }
 
-Buffer *buffer_copy(Buffer *buf)
+/**
+ * Duplicate a Buffer
+ * @param src source Buffer
+ */
+Buffer *buffer_copy(Buffer *src)
 {
-    /*
-     * duplicate a Buffer
-     */
-    if (!buf)
+    if (!src)
         err_quit("null pointer duplicating buffer");
-    return buffer_copyl(buf, buf->len);
+    return buffer_copyl(src, src->len);
 }
 
-Buffer *buffer_copyl(Buffer *buf, size_t len)
+/**
+ * Duplicate a Buffer up to len bytes.
+ * @param src source Buffer
+ * @param len length limit of new Buffer
+ */
+Buffer *buffer_copyl(Buffer *src, size_t len)
 {
-    /*
-     * duplicate a Buffer
-     */
-    if (!buf)
+    if (!src)
         err_quit("null pointer duplicating buffer");
 
     Buffer *ret = new_buffer();
-    buffer_append(ret, buf->data, len < buf->len ? len : buf->len);
+    buffer_append(ret, src->data, len < src->len ? len : src->len);
     return ret;
 }
 
+/**
+ * Pad buffer with zero bytes.
+ * @param buf the buffer to modify
+ * @param len the amount of bytes to append
+ */
 void buffer_pad(Buffer *buf, size_t len)
 {
-    /*
-     * pad buffer with len zeroes
-     */
     if (!buf)
         err_quit("null pointer when resizing buffer");
 

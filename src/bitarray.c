@@ -364,6 +364,11 @@ void bitarray_pad(BitArray *arr, size_t len)
     arr->len += len;
 }
 
+/**
+ * Create BitArrayReader using existing BitArraya
+ * @param src source BitArray
+ * @return the newly created reader
+ */
 BitArrayReader *bitarray_createReader(BitArray *dst)
 {
     BitArrayReader *ret = mmalloc(sizeof(BitArrayReader));
@@ -372,30 +377,34 @@ BitArrayReader *bitarray_createReader(BitArray *dst)
     return ret;
 }
 
-int bitarrayreader_readBit(BitArrayReader *br, int *dst)
+/**
+ * Iterate over bitarray. Return -1 if position in reader struct is beyond
+ * bitarray length; otherwise return number of bits read (should be 1)
+ * @param reader the reader to use
+ * @param dst pointer to the destination integer
+ * @return amount of bits read; one if a bit was read, -1 otherwise
+ */
+int bitarrayreader_readBit(BitArrayReader *reader, int *dst)
 {
-    /*
-     * iterate over bitarray
-     * return -1 if position in reader struct is beyond bitarray length
-     * otherwise return number of bits read (should be 1)
-     */
-    if (!br || !dst)
+    if (!reader || !dst)
         err_quit("null pointer accessing bitarrayreader");
-    if (br->pos >= br->data->len)
+    if (reader->pos >= reader->data->len)
         return -1;
     
-    *dst = bitarray_get(br->data, br->pos);
-    br->pos++;
+    *dst = bitarray_get(reader->data, reader->pos);
+    reader->pos++;
     return 1;
 }
 
+/**
+ * Iterate over bitarray, read 8 bits into an unsigned char.
+ * Otherwise return number of bits read (should be 8).
+ * @param reader the reader to use
+ * @param dst pointer to the destination byte
+ * @return amount of bits read; number of bits if read succeeded, -1 otherwise
+ */
 int bitarrayreader_readByte(BitArrayReader *br, unsigned char *dst)
 {
-    /*
-     * iterate over bitarray, read 8 bits into an unsigned char
-     * return -1 if position in reader struct is beyond bitarray length
-     * otherwise return number of bits read (should be 8)
-     */
     if (!br || !dst)
         err_quit("null pointer accessing bitarrayreader");
     if (br->pos + 8 > br->data->len)
@@ -406,48 +415,58 @@ int bitarrayreader_readByte(BitArrayReader *br, unsigned char *dst)
     return 8;
 }
 
-void delete_bitarrayreader(BitArrayReader *br)
+/**
+ * Delete BitArrayReader.
+ * @param reader the reader to delete
+ */
+void delete_bitarrayreader(BitArrayReader *reader)
 {
-    if (!br)
+    if (!reader)
         return;
 
-    free(br);
+    free(reader);
 }
 
-void bitarray_writeInteger(BitArray *ba, size_t val)
+/**
+ * Encode unsigned integer in bit packed format: 1 bit for end marker, 8 bits
+ * for data. Little endian order.
+ * @param dst destination BitArray
+ */
+void bitarray_writeInteger(BitArray *dst, size_t val)
 {
-    /*
-     * encode Huffman buffer length in bit packed format:
-     * 1 bit for end marker, 8 bits for data
-     * little endian order
-     */
     while (val > 0) {
-        bitarray_append(ba, 0);
-        bitarray_appendByte(ba, val & 0xff);
+        bitarray_append(dst, 0);
+        bitarray_appendByte(dst, val & 0xff);
         val >>= 8;
     }
-    bitarray_append(ba, 1); // append end marker
+    bitarray_append(dst, 1); // append end marker
 }
 
-size_t bitarrayreader_readInteger(BitArrayReader *br)
+/**
+ * Decode unsigned integer in bit packed format: 1 bit for end marker, 8 bits
+ * for data. Little endian order.
+ * @param src source BitArray
+ * @return the integer that was read
+ */
+size_t bitarrayreader_readInteger(BitArrayReader *src)
 {
     /*
-     * decode Huffman buffer length
+     * decode integer
      */
     int end = 0;
     
-    if (bitarrayreader_readBit(br, &end) != 1)
+    if (bitarrayreader_readBit(src, &end) != 1)
         err_quit("failed to read bit in decodeLength");
 
     size_t ret = 0;
     int offset = 0;
     while (!end) {
         unsigned char byte = 0;
-        if (bitarrayreader_readByte(br, &byte) != 8)
+        if (bitarrayreader_readByte(src, &byte) != 8)
             err_quit("failed to read byte in decodeLength");
         ret |= (byte << offset);
         offset += 8;
-        if (bitarrayreader_readBit(br, &end) != 1)
+        if (bitarrayreader_readBit(src, &end) != 1)
             err_quit("failed to read bit in decodeLength");
     }
     return ret;
