@@ -70,10 +70,7 @@ void encodeLZSSPayloadByteLevel(Buffer *src, Buffer *dst)
 
             int distance = searchIndexPrev - searchPrev->len + 1;
             int length = searchPrev->len;
-            if (length > 2 && distance >= length) {
-                // unsigned char tmpstr[20] = {0};
-                // memcpy(tmpstr, searchPrev->data, searchPrev->len);
-                // fprintf(stderr, "writing token (%4d,%3d): %-20s\n", distance, length, tmpstr);
+            if (length > 2 && distance > length && distance + length < symbols_output) {
                 writeByteToken(dst, distance, length);
             } else {
                 writeByteString(dst, searchPrev);
@@ -172,6 +169,7 @@ Buffer *decodeLZSSPayloadByteLevel(BufferReader *reader)
         err_quit("null pointer when decoding LZSS payload");
 
     Buffer *output = new_buffer();
+    Buffer *temp = new_buffer();
     while (!bufferreader_isFinal(reader)) {
         unsigned char byte = 0;
 
@@ -192,17 +190,20 @@ Buffer *decodeLZSSPayloadByteLevel(BufferReader *reader)
                 buffer_append(output, &byte, 1);
             } else {
                 // copy string indicated by token
-                if (distance > output->len || distance < length) {
+                if (distance > output->len || output->len - distance + length > output->len) {
                     fprintf(stderr, "distance:%5u, length:%3u, file length: %luB\n", distance, length, output->len);
-                    err_quit("token distance out of bounds");
+                    err_quit("token string out of bounds");
                 }
             }
-            buffer_append(output, &output->data[output->len - distance], length);
+            buffer_append(temp, &output->data[output->len - distance], length);
+            buffer_concatl(output, temp, length);
+            buffer_clear(temp);
         } else {
             // normal literal
             buffer_append(output, &byte, 1);
         }
     }
+    delete_buffer(temp);
 
     return output;
 }

@@ -252,26 +252,9 @@ void bitarray_setString(BitArray *dst, unsigned char *src, size_t len, size_t po
     if (!dst)
         err_quit("null pointer when appending bit string to BitArray");
 
-    if (len < 1)
-        err_quit("invalid length in bitarray_setString");
-    if (pos + len > dst->len)
-        err_quit("index out of bounds in bitarray_setString");
-
-    int offset = pos % 8;
-    size_t i = 0;
-    size_t floor = len - (len % 8);
-
-    if (offset == 0) {
-        memcpy(&dst->data->data[pos / 8], src, len / 8);
-        i += floor;
-    } else {
-        for (; i < floor; i += 8) {
-            bitarray_setByte(dst, src[i / 8], pos + i);
-        }
-    }
-    for (; i < len; i++) {
-        size_t byte = i / 8;
-        size_t offset = i % 8;
+    for (size_t i = 0; i < len; i++) {
+        int byte = i / 8;
+        int offset = i % 8;
         unsigned char bit = (src[byte] & (1 << offset)) > 0;
         bitarray_set(dst, bit, pos++);
     }

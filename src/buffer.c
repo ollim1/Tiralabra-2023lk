@@ -104,6 +104,14 @@ void buffer_shrink(Buffer *buf)
     buf->len--;
 }
 
+void buffer_concatl(Buffer *dest, Buffer *src, size_t len)
+{
+    if (!dest || !src)
+        err_quit("null pointer when appending to buffer");
+
+    buffer_append(dest, src->data, len);
+}
+
 void buffer_append(Buffer *dest, unsigned char *src, size_t len)
 {
     if (!dest || !src)
@@ -113,9 +121,9 @@ void buffer_append(Buffer *dest, unsigned char *src, size_t len)
     while (dest->len + len > newSize)
         newSize *= 2;
 
-    if (newSize > dest->size) {
+    if (newSize > dest->size)
         buffer_resize(dest, newSize);
-    }
+
     memcpy(dest->data + dest->len, src, len);
     dest->len += len;
 }

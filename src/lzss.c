@@ -28,6 +28,7 @@ Buffer *lzss_compress(Buffer *src)
     bitarray_writeInteger(compressed, src->len);
     encodeLZSSPayloadBitLevel(src, compressed);
     Buffer *ret = compressed->data;
+    compressed->data->len = compressed->len / 8 + 1;
 
     delete_bitarrayPreserveContents(compressed);
     return ret;
@@ -41,7 +42,7 @@ Buffer *lzss_compress(Buffer *src)
  */
 void encodeLZSSPayloadBitLevel(Buffer *src, BitArray *dst)
 {
-    RingBuffer *dictionary = new_ringbuffer(WINDOW_SIZE);
+    RingBuffer *dictionary = new_ringbuffer(WINDOW_SIZE + 10);
     Buffer *search = new_buffer();
     Buffer *searchPrev = new_buffer();
     int searchIndexPrev = -1;
@@ -66,7 +67,7 @@ void encodeLZSSPayloadBitLevel(Buffer *src, BitArray *dst)
             // calculate token information
             int distance = searchIndexPrev - searchPrev->len + 1;
             int length = searchPrev->len;
-            if (length > 2 && distance >= length) {
+            if (length > 1 && distance > length && distance + length < symbols_output) {
                 // skip encoding token if the amount of bytes represented is
                 // smaller than the length of the token itself
                 writeToken(dst, distance, length);
@@ -106,6 +107,7 @@ Buffer *decodeLZSSPayloadBitLevel(BitArrayReader *reader, size_t decoded_length)
         err_quit("null pointer when decoding LZSS payload");
 
     Buffer *output = new_buffer();
+    Buffer *temp = new_buffer();
     while (output->len < decoded_length) {
         int bit = 0;
 
@@ -119,11 +121,13 @@ Buffer *decodeLZSSPayloadBitLevel(BitArrayReader *reader, size_t decoded_length)
             if (readToken(reader, &distance, &length) < 16)
                 err_quit("unexpected end of file while reading payload token");
             // copy string indicated by token
-            if (distance > output->len || distance < length) {
-                fprintf(stderr, "distance:%5u, length:%3u, file length: %luB\n", distance, length, output->len);
-                err_quit("token distance out of bounds");
+            if (distance > output->len || output->len - distance + length > output->len) {
+                fprintf(stderr, "distance:%5u, length:%3u, file length: %lu\n", distance, length, output->len);
+                err_quit("token string out of bounds");
             }
-            buffer_append(output, &output->data[output->len - distance], length);
+            buffer_append(temp, &output->data[output->len - distance], length);
+            buffer_concatl(output, temp, length);
+            buffer_clear(temp);
         } else {
             // token bit unset, next byte will be a literal
             unsigned char byte = 0;
@@ -132,6 +136,7 @@ Buffer *decodeLZSSPayloadBitLevel(BitArrayReader *reader, size_t decoded_length)
             buffer_append(output, &byte, 1);
         }
     }
+    delete_buffer(temp);
 
     return output;
 }
@@ -152,6 +157,7 @@ int findMatch(RingBuffer *haystack, Buffer *needle)
         return -1;
     int distance;
     int length = 0;
+
     for (distance = 0; distance < haystack->len && distance < WINDOW_SIZE; distance++) {
         unsigned char c = ringbuffer_getRev(haystack, distance);
         if (c == needle->data[needle->len - length - 1]) {
