@@ -6,12 +6,14 @@
 #include "../include/buffer.h"
 #include <stdint.h>
 
+/**
+ * Compresses Buffer using the LZSS (Lempel-Ziv-Storer-Szymanski algorithm.
+ * Byte-level variant.
+ * @param src input Buffer
+ * @return LZSS-compressed output
+ */
 Buffer *lzss_byte_compress(Buffer *src)
 {
-    /*
-     * Compresses Buffer using the LZSS (Lempel-Ziv-Storer-Szymanski algorithm.
-     * Byte-level variant.
-     */
 
     if (!src)
         err_quit("null pointer in huffman_compress");
@@ -21,7 +23,7 @@ Buffer *lzss_byte_compress(Buffer *src)
     }
 
     Buffer *compressed = new_buffer();
-    // write output length
+
     encodeLZSSPayloadByteLevel(src, compressed);
 
     return compressed;
@@ -58,11 +60,11 @@ void encodeLZSSPayloadByteLevel(Buffer *src, Buffer *dst)
         unsigned char c = src->data[i];
         // append to search buffer
         buffer_append(search, &c, 1);
-        int searchIndex = findMatch(dictionary, search);
+        int searchIndex = findMatchKMP(dictionary, search);
 
         // if a matching string is in the ring buffer, then check if the
         // previous search string was
-        if (searchPrev->len == 15 || searchIndex == -1 || i == src->len - 1) {
+        if (searchPrev->len == TOKEN_MAXLEN || searchIndex == -1 || i == src->len - 1) {
             if (i == src->len - 1 && searchIndex != -1) {
                 buffer_append(searchPrev, &c, 1);
                 searchIndexPrev = searchIndex;

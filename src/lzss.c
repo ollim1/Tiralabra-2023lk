@@ -27,10 +27,8 @@ Buffer *lzss_compress(Buffer *src)
     // write output length
     bitarray_writeInteger(compressed, src->len);
     encodeLZSSPayloadBitLevel(src, compressed);
-    Buffer *ret = compressed->data;
-    compressed->data->len = compressed->len / 8 + 1;
+    Buffer *ret = bitarray_deleteAndConvertToBuffer(compressed);
 
-    delete_bitarrayPreserveContents(compressed);
     return ret;
 }
 
@@ -42,7 +40,7 @@ Buffer *lzss_compress(Buffer *src)
  */
 void encodeLZSSPayloadBitLevel(Buffer *src, BitArray *dst)
 {
-    RingBuffer *dictionary = new_ringbuffer(WINDOW_SIZE + 10);
+    RingBuffer *dictionary = new_ringbuffer(WINDOW_SIZE);
     Buffer *search = new_buffer();
     Buffer *searchPrev = new_buffer();
     int searchIndexPrev = -1;
@@ -55,10 +53,10 @@ void encodeLZSSPayloadBitLevel(Buffer *src, BitArray *dst)
         // append to search buffer and look up current lookahead string in the
         // ring buffer
         buffer_append(search, &c, 1);
-        int searchIndex = findMatch(dictionary, search);
+        int searchIndex = findMatchKMP(dictionary, search);
 
         // If string match fails, check if previous match succeeded.
-        if (searchPrev->len == 15 || searchIndex == -1 || i == src->len - 1) {
+        if (searchPrev->len == TOKEN_MAXLEN || searchIndex == -1 || i == src->len - 1) {
             if (i == src->len - 1 && searchIndex != -1) {
                 buffer_append(searchPrev, &c, 1);
                 searchIndexPrev = searchIndex;
@@ -106,11 +104,13 @@ Buffer *decodeLZSSPayloadBitLevel(BitArrayReader *reader, size_t decoded_length)
     if (!reader)
         err_quit("null pointer when decoding LZSS payload");
 
+    // output and temp buffers
     Buffer *output = new_buffer();
     Buffer *temp = new_buffer();
     while (output->len < decoded_length) {
         int bit = 0;
 
+        // read a bit to check if next byte is a literal or part of a token
         if (bitarrayreader_readBit(reader, &bit) < 1)
             err_quit("unexpected end of file while reading payload bit");
 
@@ -155,10 +155,8 @@ int findMatch(RingBuffer *haystack, Buffer *needle)
 
     if (needle->len < 1 || haystack->len < 1)
         return -1;
-    int distance;
-    int length = 0;
-
-    for (distance = 0; distance < haystack->len && distance < WINDOW_SIZE; distance++) {
+    
+    for (int length = 0, distance = 0; distance < haystack->len && distance < WINDOW_SIZE; distance++) {
         unsigned char c = ringbuffer_getRev(haystack, distance);
         if (c == needle->data[needle->len - length - 1]) {
             length++;
@@ -170,6 +168,68 @@ int findMatch(RingBuffer *haystack, Buffer *needle)
             return distance + 1;
     }
     return -1;
+}
+
+/**
+ * Find string needle from ringbuffer haystack in order. Optimized using KMP
+ * (Knuth-Morris-Pratt) algorithm.
+ * @param haystack the RingBuffer to check
+ * @param needle string to find in the the RingBuffer
+ * @return index starting from the end of the array, or -1 if no match
+ */
+int findMatchKMP(RingBuffer *haystack, Buffer *needle)
+{
+    if (!haystack || !needle)
+        err_quit("null pointer in findMatch");
+
+    if (needle->len < 1 || haystack->len < 1)
+        return -1;
+
+    int ringBufferPosition = 0;
+    int matchPosition = 0;
+
+    int KMPTable[TOKEN_MAXLEN] = {0};
+    genKMPTable(needle, KMPTable);
+    
+    while (ringBufferPosition < haystack->len && ringBufferPosition < WINDOW_SIZE) {
+        unsigned char c = ringbuffer_get(haystack, ringBufferPosition);
+        if (c == needle->data[matchPosition]) {
+            ringBufferPosition++;
+            matchPosition++;
+            if (matchPosition == needle->len)
+                return haystack->len - (ringBufferPosition - needle->len);
+        } else {
+            matchPosition = KMPTable[matchPosition];
+            if (matchPosition < 0) {
+                // match was reset, 
+                ringBufferPosition++;
+                matchPosition++;
+            }
+        }
+    }
+    return -1;
+}
+
+/**
+ * Generate Knuth-Morris-Pratt table for a string.
+ * Assuming result table is the same size as the string.
+ * @param needle string to analyze
+ * @param table pointer to table to use
+ */
+void genKMPTable(Buffer *needle, int *table)
+{
+    // set initial value
+    table[0] = -1;
+    // walk through string
+    for (int pos = 1, cnd = 0; pos < needle->len; pos++, cnd++) {
+        if (needle->data[pos] == needle->data[cnd]) {
+            table[pos] = table[cnd];
+        } else {
+            table[pos] = cnd;
+            while (cnd >= 0 && needle->data[pos] != needle->data[cnd])
+                cnd = table[cnd];
+        }
+    }
 }
 
 /**
@@ -198,10 +258,14 @@ void writeToken(BitArray *dst, unsigned distance, unsigned length)
 {
     if (!dst)
         err_quit("null pointer in writeToken");
-    if ((distance >> TOKEN_DISTANCE_BITS) > 0)
+    if ((distance >> TOKEN_DISTANCE_BITS) > 0) {
+        fprintf(stderr, "distance:%5u, length:%3u\n", distance, length);
         err_quit("invalid reference token distance");
-    if ((length >> TOKEN_LENGTH_BITS) > 0)
+    }
+    if ((length >> TOKEN_LENGTH_BITS) > 0) {
+        fprintf(stderr, "distance:%5u, length:%3u\n", distance, length);
         err_quit("invalid reference token length");
+    }
     if (distance < length) {
         fprintf(stderr, "distance:%5u, length:%3u\n", distance, length);
         err_quit("invalid reference token distance");

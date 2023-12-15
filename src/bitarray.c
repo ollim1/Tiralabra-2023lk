@@ -59,6 +59,23 @@ void delete_bitarrayPreserveContents(BitArray *ba)
 }
 
 /**
+ * Takes the Buffer out of a BitArray and returns it.
+ * Deletes the original BitArray.
+ * @param ba the BitArray to convert
+ * @return the Buffer contained in the BitArray
+ */
+Buffer *bitarray_deleteAndConvertToBuffer(BitArray *ba)
+{
+    if (!ba)
+        err_quit("null pointer in bitarray_convertToBuffer");
+
+    Buffer *ret = ba->data;
+    ret->len = ba->len / 8 + 1;
+    free(ba);
+    return ret;
+}
+
+/**
  * Turns a Buffer into a BitArray.
  * @param src buffer to encapsulate
  * @return the newly created BitArray

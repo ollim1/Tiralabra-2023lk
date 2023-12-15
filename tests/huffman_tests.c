@@ -182,6 +182,7 @@ START_TEST(test_cacheHuffcodes)
     ck_assert_ptr_nonnull(codes['c']);
     ck_assert_int_eq(bitarray_equals(codes['c'], expected), 1); 
     delete_bitarray(expected);
+    delete_huffnode(abc);
 }
 END_TEST
 
@@ -274,15 +275,6 @@ START_TEST(test_huffman_compress_decompress_4)
 }
 END_TEST
 
-START_TEST(test_huffman_compress_decompress_empty)
-{
-    Buffer *src = new_buffer();
-    Buffer *compressed = huffman_compress(src);
-    Buffer *result = huffman_extract(compressed);
-    ck_assert_str_eq((char *)result->data, (char *)src->data);
-}
-END_TEST
-
 Suite *hufftree_suite(void)
 {
     Suite *s;
@@ -314,7 +306,6 @@ Suite *huffman_suite(void)
     tcase_add_test(tc_core, test_huffman_compress_decompress_2);
     tcase_add_test(tc_core, test_huffman_compress_decompress_3);
     tcase_add_test(tc_core, test_huffman_compress_decompress_4);
-    tcase_add_test(tc_core, test_huffman_compress_decompress_empty);
     suite_add_tcase(s, tc_core);
 
     return s;

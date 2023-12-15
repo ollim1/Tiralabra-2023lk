@@ -40,8 +40,7 @@ Buffer *huffman_compress(Buffer *src)
     // encode payload
     encodeHuffmanPayload(src, output, codes);
 
-    Buffer *ret = bitarray_toBuffer(output);
-    delete_bitarray(output);
+    Buffer *ret = bitarray_deleteAndConvertToBuffer(output);
     delete_huffnode(tree);
     for (int i = 0; i < MAX_LEAVES; i++) {
         if (codes[i])
@@ -169,10 +168,9 @@ Buffer *decodeHuffmanPayload(BitArrayReader *reader, HuffNode *tree, size_t deco
  */
 Buffer *huffman_extract(Buffer *src)
 {
-    if (src->len == 0) {
-        fputs("file is empty, skipping extraction\n", stderr);
-        return src;
-    }
+    if (src->len == 0)
+        err_quit("file is empty, skipping extraction\n");
+
     // wrap Buffer in BitArray
     BitArray *data = bitarray_fromBuffer(src);
     // create reader for BitArray
