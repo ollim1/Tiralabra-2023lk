@@ -2,7 +2,7 @@
 [![codecov](https://codecov.io/gh/ollim1/Tiralabra_2023lk/branch/main/graph/badge.svg?token=1M4X0W2FRS)](https://codecov.io/gh/ollim1/Tiralabra_2023lk)
 [![Test](https://github.com/ollim1/Tiralabra_2023lk/actions/workflows/test.yml/badge.svg)](https://github.com/ollim1/Tiralabra_2023lk/actions/workflows/test.yml)
 
-A file compressor with two algorithms available: Huffman, Lempel-Ziv (LZSS). Implemented in C. A software project done for the [Algorithms and AI lab course](https://tiralabra.github.io/2023_loppukesa/index) at University of Helsinki as part of the Computer Science study program (TKT).
+A file compressor with two algorithms implemented: Huffman, Lempel-Ziv (LZSS). Written in C. A software project done for the [Algorithms and AI lab course](https://tiralabra.github.io/2023_loppukesa/index) at University of Helsinki as part of the Computer Science study program (TKT).
 
 Continued from 2023/LK.
 
@@ -18,32 +18,43 @@ Continued from 2023/LK.
 ### [Week 4](doc/week4.md)
 ### [Week 5](doc/week5.md)
 ### [Week 6](doc/week6.md)
+### [Week 6](doc/week7.md)
 
 ## How to build
 ### Requirements
+
 - C compiler (clang or gcc)
 - Make
-- Check
+- Check framework (`libcheck`)
 - `gcovr` on Linux for coverage reports (broken on Apple Silicon Macs)
 - Python for auto-formatting
 
 ### Compilation
+
 To build the software, run `make` in the root directory of the repository. This produces the binary `compressor`, which can be run by executing `./compressor`.
 
 ### Testing
+
 Unit tests are set up in the make file under the command `make check`.
 
+Algorithm-specific tests can be run with the commands `make check-huffman` and `make check-lzss`.
+
 ### Code formatting
+
 Code auto-formatting can be applied with `make format`. This requires `clang-format` and `python` to be installed (Debian-based systems may need `python-is-python3`).
 
 ### Code coverage
-Run `make coverage-html`. The report will be written to `coverage.html`
+
+Run `make coverage-html`. The report will be written to `coverage.html` in the project root directory.
 
 ## Usage
+
 Running `compressor` with no arguments will cause usage information to be printed.
+
 ```Usage:
--a [algorithm]: compression algorithm; huff or lzss
+-a [algorithm]: compression algorithm; huff, lzss, lzss-byte or lzhf
 -e: extract (default huffman)
 -c: compress (default huffman)
 -i [infile]: set input file, - for stdin (default)
--o [outfile]: set output file, - for stdout (default)```
+-o [outfile]: set output file, - for stdout (default)
+-b: benchmark algorithm performance without saving output```
