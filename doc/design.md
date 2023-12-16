@@ -1,4 +1,4 @@
-# Design
+# Specification and design
 
 This project is done as a part of the Computer Science study program of University of Helsinki (TKT).
 In this project two algorithms will be implemented for compression rate comparisons.

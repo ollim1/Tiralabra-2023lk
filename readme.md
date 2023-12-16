@@ -8,8 +8,8 @@ Continued from 2023/LK.
 
 ## Documentation links
 
-### [Design document](doc/design.md)
-### [Testing document](doc/testing.md)
+### [Specification and design](doc/design.md)
+### [Testing](doc/testing.md)
 ### [Manual](doc/manual.md)
 
 ## Weekly reports
