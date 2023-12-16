@@ -10,6 +10,7 @@ Continued from 2023/LK.
 
 ### [Design document](doc/design.md)
 ### [Testing document](doc/testing.md)
+### [Manual](doc/manual.md)
 
 ## Weekly reports
 ### [Week 1](doc/week1.md)
@@ -18,36 +19,11 @@ Continued from 2023/LK.
 ### [Week 4](doc/week4.md)
 ### [Week 5](doc/week5.md)
 ### [Week 6](doc/week6.md)
-### [Week 6](doc/week7.md)
-
-## How to build
-### Requirements
-
-- C compiler (clang or gcc)
-- Make
-- Check framework (`libcheck`)
-- `gcovr` on Linux for coverage reports (broken on Apple Silicon Macs)
-- Python for auto-formatting
-
-### Compilation
-
-To build the software, run `make` in the root directory of the repository. This produces the binary `compressor`, which can be run by executing `./compressor`.
-
-### Testing
-
-Unit tests are set up in the make file under the command `make check`.
-
-Algorithm-specific tests can be run with the commands `make check-huffman` and `make check-lzss`.
-
-### Code formatting
-
-Code auto-formatting can be applied with `make format`. This requires `clang-format` and `python` to be installed (Debian-based systems may need `python-is-python3`).
-
-### Code coverage
-
-Run `make coverage-html`. The report will be written to `coverage.html` in the project root directory.
+### [Week 7](doc/week7.md)
 
 ## Usage
+
+`cd` to the root directory of the project and run `make` to build it.
 
 Running `compressor` with no arguments will cause usage information to be printed.
 

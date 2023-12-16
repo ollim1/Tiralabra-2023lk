@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../include/lzss_common.h"
 #include "../include/lzss_byte.h"
 #include "../include/lzss_byte_private.h"
 #include "../include/ringbuffer.h"

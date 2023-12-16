@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "../include/lzss.h"
+#include "../include/lzss_common.h"
 #include "../include/lzss_private.h"
 #include "../include/ringbuffer.h"
 #include "../include/bitarray.h"

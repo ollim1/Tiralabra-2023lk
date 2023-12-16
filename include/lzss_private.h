@@ -2,14 +2,7 @@
 #define LZSS_PRIVATE_H
 #include "bitarray.h"
 #include "ringbuffer.h"
-#define WINDOW_SIZE 4096 // size of dictionary window
-#define TOKEN_DISTANCE_BITS 12 // amount of bits for distance of reference from current position (max value 4095
-#define TOKEN_LENGTH_BITS 4 // amount of bits for length of reference (max value 15)
-#define TOKEN_MAXLEN 15
 
-int findMatch(RingBuffer *haystack, Buffer *needle);
-int findMatchKMP(RingBuffer *haystack, Buffer *needle);
-void genKMPTable(Buffer *needle, int *table);
 void writeToken(BitArray *dst, unsigned distance, unsigned length);
 int readToken(BitArrayReader *src, unsigned *distance, unsigned *length);
 void writeString(BitArray *dst, Buffer *src);

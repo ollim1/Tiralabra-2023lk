@@ -13,6 +13,8 @@ and byte-level where tokens are marked by `0xff` escape values.
 ## Data structures
 Priority queue and complete binary tree for Huffman. LZSS uses a ring buffer.
 
+Basic data structures include a bit set called BitArray and an array list of unsigned bytes called Buffer.
+
 ### Huffman
 The Huffman tree is implemented as a complete binary tree.
 This tree is serialized by performing a depth-first search in the tree and storing the node information in the order of traversal.  
@@ -33,7 +35,7 @@ This makes the algorithm's asymptotic time complexity O($n$) where $n$ is the si
 Lempel-Ziv progresses linearily in the input with a fixed size window for compression.
 This implementation performs a KMP search in O($d \times w$) time but has a best case of &Theta;($w$),
 where $w$ is the lmaximum word length and $d$ the maximum length of the sliding window dictionary.
-Overall time complexity is O($n \times d \times w$).
+Overall time complexity is O($n \times d \times w$). This is dramatically slower than Huffman due to the size of the window.
 
 ## Compression Ratio
 
@@ -44,7 +46,7 @@ In addition, the decoded length of the file is stored in byte-packed form that t
 Decoded file length is limited to the maximum value of `size_t`, which is effectively $2^64$.
 This results in at most 328 bytes of overhead.
 
-Huffman coding has a best case compression ratio of 800% when files consist of more than one byte value.
+Huffman coding has a best case asymptotic compression ratio of 800% when files consist of more than one byte value.
 Files consisting of only a single value contain only the file length and a single tree node.
 
 ### LZSS
@@ -56,11 +58,15 @@ Byte-level: tokens take 3 bytes to encode while literals take 1-2 bytes.
 Tokens are marked with a `0xff` byte followed by either `0x00` meaning a `0xff` literal or a value containing the lower 8 bytes of the token, which is always nonzero.
 Best case compression ratio is 500%, calculated by taking the compression ratio between 15 literals and the respective 3-byte token.
 
+### Combined compression
+
+LZSS-byte compression can be combined with Huffman compression for a best case compression ratio of 4000%. This shows in the [benchmarks](testing.md).
+
 ## Input/Output
 
 The program will use take input from binary or text files and stdin.
-The compression and decompression algorithms to be used may be specified through command line flags.
-The program will output to stdout or a file.
+The compression and decompression algorithms to be used may be specified through the command line arguments `-a`.
+The program will output to stdout or a file, specified with the argument `-i`.
 
 ## Final thoughts and further improvements
 

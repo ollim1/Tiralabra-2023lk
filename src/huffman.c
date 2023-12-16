@@ -35,8 +35,10 @@ Buffer *huffman_compress(Buffer *src)
     // encode unpacked length
     bitarray_writeInteger(output, src->len);
     // encode tree
+    size_t diff = output->len;
     huffnode_serialize(tree, output);
-    fprintf(stderr, "size of serialized Huffman tree: %lu bits (%lu bytes)\n", output->len, output->len / 8 + 1);
+    diff = output->len - diff;
+    fprintf(stderr, "size of serialized Huffman tree: %lu bits (%lu bytes)\n", diff, (diff - 1) / 8 + 1);
     // encode payload
     encodeHuffmanPayload(src, output, codes);
 
@@ -183,5 +185,8 @@ Buffer *huffman_extract(Buffer *src)
         err_quit("failed to read header");
     // decode Huffman coded payload
     Buffer *ret = decodeHuffmanPayload(reader, tree, decoded_length);
+    delete_bitarrayreader(reader);
+    delete_huffnode(tree);
+    delete_bitarrayPreserveContents(data);
     return ret;
 }

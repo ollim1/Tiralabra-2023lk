@@ -70,7 +70,7 @@ Buffer *bitarray_deleteAndConvertToBuffer(BitArray *ba)
         err_quit("null pointer in bitarray_convertToBuffer");
 
     Buffer *ret = ba->data;
-    ret->len = ba->len / 8 + 1;
+    ret->len = (ba->len - 1) / 8 + 1;
     free(ba);
     return ret;
 }
@@ -139,7 +139,7 @@ Buffer *bitarray_toBuffer(BitArray *src)
     if (!src)
         err_quit("null pointer converting BitArray");
 
-    return buffer_copyl(src->data, (src->len / 8) + 1);
+    return buffer_copyl(src->data, (src->len - 1) / 8 + 1);
 }
 
 /**
@@ -360,7 +360,7 @@ void bitarray_pad(BitArray *arr, size_t len)
     if (!arr)
         err_quit("null pointer when padding BitArray");
 
-    buffer_pad(arr->data, len / 8 + 1);
+    buffer_pad(arr->data, (len - 1) / 8 + 1);
     arr->len += len;
 }
 

@@ -8,13 +8,18 @@
 
 ## Unit testing
 
-Unit tests are implemented using the Check framework. They cover expected basic functionality like adding to a queue or buffer and struct initialization.
+Unit tests are implemented using the Check framework.
+They cover expected basic functionality like adding to a queue or buffer and struct initialization.
 
-Run unit tests with the command `make check`. For this, the package `check` should be installed from your distribution's package manager.
+Run unit tests with the command `make check`.
+Algorithm-specific tests are accessible with `make check-huffman` and `make check-lzss`.
+For this, the package `check` should be installed from your distribution's package manager.
 
 ## Comparison of algorithms
 
-Comparison testing is implemented using different kinds of input files and averaged over multiple iterations. Files are omitted from repository due to their size.
+Comparison testing was done using multiple kinds of input files.
+Image files have been compressed in PNG format. Convert them to BMP for testing.
+Run `./compressor -ba <algorithm> -i <file>` to reproduce.
 
 During testing the primary metric of comparison is compression ratio of input. LZSS is a slow algorithm even optimized, so time spent compressing should not matter.
 
@@ -61,3 +66,16 @@ Compression ratio means ratio of uncompressed file to compressed output. Measure
     - LZHF
         - compression 1.06 s, extraction 0.000374 s
         - compression ratio 273%
+- ff.bin (99KiB), file consisting of just `0xff` bytes
+    - Huffman
+        - compression 0.0000372 s, extraction 0.0000908 s
+        - compression ratio 2020000%
+    - LZHF
+        - compression 0.00138 s, extraction 0.0000361 s
+        - compression ratio 550%
+    - LZHF
+        - compression 0.00135 s, extraction 0.0000377 s
+        - compression ratio 366%
+    - LZHF
+        - compression 1.06 s, extraction 0.000374 s
+        - compression ratio 1908%

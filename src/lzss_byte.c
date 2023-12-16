@@ -1,4 +1,5 @@
 #include "../include/lzss_byte.h"
+#include "../include/lzss_common.h"
 #include "../include/ealloc.h"
 #include "../include/error.h"
 #include "../include/lzss_byte_private.h"
@@ -29,6 +30,11 @@ Buffer *lzss_byte_compress(Buffer *src)
     return compressed;
 }
 
+/**
+ * Decompress LZSS-compressed Buffer.
+ * @param src compressed source Buffer
+ * @return decompressed Buffer
+ */
 Buffer *lzss_byte_extract(Buffer *src)
 {
     // generate a reader from the buffer
@@ -41,13 +47,15 @@ Buffer *lzss_byte_extract(Buffer *src)
     return decompressed;
 }
 
+/**
+ * Encode LZSS payload. Byte-level implementation. Byte literals are output
+ * as-is, while tokens are prefixed by a 0xff byte. If the next byte is 0x00,
+ * the token should be read as a 0xff literal. 
+ * @param src the source Buffer
+ * @param dst the destination Buffer
+ */
 void encodeLZSSPayloadByteLevel(Buffer *src, Buffer *dst)
 {
-    /*
-     * encode LZSS payload. Byte-level implementation. Byte literals are output
-     * as-is, while tokens are prefixed by a 0xff byte. If the next byte is 0x00,
-     * the token should be read as a 0xff literal. 
-     */
     RingBuffer *dictionary = new_ringbuffer(WINDOW_SIZE);
     Buffer *search = new_buffer();
     Buffer *searchPrev = new_buffer();
@@ -96,11 +104,16 @@ void encodeLZSSPayloadByteLevel(Buffer *src, Buffer *dst)
     delete_ringbuffer(dictionary);
 }
 
+/**
+ * Write LZSS reference token encoded in a little-endian 16-bit value.
+ * Integer format: dddddddddddd:llll, 12 distance bits:4 length bits
+ * On disk: dddd:llll dddddddd
+ * @param dst destination BitArray
+ * @param distance distance of the end of referenced string from current position
+ * @param length length of referenced string
+ */
 int writeByteToken(Buffer *dst, unsigned distance, unsigned length)
 {
-    /*
-     * write LZSS reference token encoded in a big-endian 16-bit value
-     */
     if (!dst)
         err_quit("null pointer in writeToken");
     if ((distance >> TOKEN_DISTANCE_BITS) > 0)
@@ -120,11 +133,15 @@ int writeByteToken(Buffer *dst, unsigned distance, unsigned length)
 }
 
 
+/**
+ * Write string of LZSS literals to Buffer. 0xff values are escaped using a
+ * 0x00 byte afterward.
+ * @param dst destination Buffer
+ * @param src the source Buffer containing the bytes to write
+ * @return amount of literals written
+ */
 int writeByteString(Buffer *dst, Buffer *src)
 {
-    /*
-     * write string of literals
-     */
     if (!dst || !src)
         err_quit("null pointer writing literal");
     size_t i = 0;
@@ -141,14 +158,22 @@ int writeByteString(Buffer *dst, Buffer *src)
     return i;
 }
 
-int readByteToken(BufferReader *src, unsigned *distance, unsigned *length)
+/**
+ * Read LZSS reference token. Format is little-endian, so first byte will always
+ * be nonzero as it contains all of the length bits.
+ * @param reader reader for source Buffer
+ * @param distance pointer to distance variable
+ * @param length pointer to length variable
+ * @return amount of bytes read
+ */
+int readByteToken(BufferReader *reader, unsigned *distance, unsigned *length)
 {
-    if (!src)
+    if (!reader)
         err_quit("null pointer reading byte token");
     unsigned char temp;
     unsigned val = 0;
     int ret = 0;
-    if (bufferreader_read(src, &temp, 1) < 1)
+    if (bufferreader_read(reader, &temp, 1) < 1)
         err_quit("failed to read byte token");
     if (temp == 0) {
         // escaping token into a 0xff literal
@@ -157,7 +182,7 @@ int readByteToken(BufferReader *src, unsigned *distance, unsigned *length)
         return 1;
     }
     val = temp;
-    ret += bufferreader_read(src, &temp, 1);
+    ret += bufferreader_read(reader, &temp, 1);
     val |= temp << 8;
     *distance = val >> TOKEN_LENGTH_BITS;
     *length = val & ((1 << TOKEN_LENGTH_BITS) - 1);
@@ -165,12 +190,20 @@ int readByteToken(BufferReader *src, unsigned *distance, unsigned *length)
     return ret;
 }
 
+/**
+ * Decode LZSS payload.
+ * @param reader BufferReader for reading input stream.
+ * @param decoded_length length of decoded output in bytes
+ * @return Buffer containing decoded output
+ */
 Buffer *decodeLZSSPayloadByteLevel(BufferReader *reader)
 {
     if (!reader)
         err_quit("null pointer when decoding LZSS payload");
 
+    // output buffer
     Buffer *output = new_buffer();
+    // temp buffer for token expansion
     Buffer *temp = new_buffer();
     while (!bufferreader_isFinal(reader)) {
         unsigned char byte = 0;
@@ -197,7 +230,9 @@ Buffer *decodeLZSSPayloadByteLevel(BufferReader *reader)
                     err_quit("token string out of bounds");
                 }
             }
+            // read string referenced by token to temp buffer
             buffer_append(temp, &output->data[output->len - distance], length);
+            // append temp buffer contents to output
             buffer_concatl(output, temp, length);
             buffer_clear(temp);
         } else {
