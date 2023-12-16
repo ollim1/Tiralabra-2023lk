@@ -27,10 +27,11 @@ Continued from 2023/LK.
 
 Running `compressor` with no arguments will cause usage information to be printed.
 
-```Usage:
+````Usage:
 -a [algorithm]: compression algorithm; huff, lzss, lzss-byte or lzhf
 -e: extract (default huffman)
 -c: compress (default huffman)
 -i [infile]: set input file, - for stdin (default)
 -o [outfile]: set output file, - for stdout (default)
--b: benchmark algorithm performance without saving output```
+-b: benchmark algorithm performance without saving output
+Example: ./compressor -ba lzhf -i samples/loremipsum-100k.txt``

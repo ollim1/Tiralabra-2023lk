@@ -218,10 +218,11 @@ void usage()
 {
     fprintf(stderr, "Usage:\n");
     fprintf(stderr, "-a [algorithm]: compression algorithm; huff, lzss, lzss-byte or lzhf\n");
-    fprintf(stderr, "-e: extract (default huffman)\n");
-    fprintf(stderr, "-c: compress (default huffman)\n");
+    fprintf(stderr, "-e: extract (default algorithm huffman)\n");
+    fprintf(stderr, "-c: compress (default algorithm huffman)\n");
     fprintf(stderr, "-i [infile]: set input file, - for stdin (default)\n");
     fprintf(stderr, "-o [outfile]: set output file, - for stdout (default)\n");
     fprintf(stderr, "-b: benchmark algorithm performance without saving output\n");
+    fprintf(stderr, "Example: ./compressor -ba lzhf -i samples/loremipsum-100k.txt\n");
     exit(EXIT_FAILURE);
 }
