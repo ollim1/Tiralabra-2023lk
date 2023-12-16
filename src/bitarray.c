@@ -269,7 +269,14 @@ void bitarray_setString(BitArray *dst, unsigned char *src, size_t len, size_t po
     if (!dst)
         err_quit("null pointer when appending bit string to BitArray");
 
-    for (size_t i = 0; i < len; i++) {
+    size_t byteLimit = len / 8;
+    size_t byte = 0;
+    // write whole bytes at a time until we run out
+    for (; byte < byteLimit; byte++, pos += 8) {
+        bitarray_setByte(dst, src[byte], pos);
+    }
+    // write the remainder one bit at a time
+    for (size_t i = byte * 8; i < len; i++) {
         int byte = i / 8;
         int offset = i % 8;
         unsigned char bit = (src[byte] & (1 << offset)) > 0;
@@ -294,8 +301,10 @@ void bitarray_setByte(BitArray *dst, unsigned char value, size_t pos)
     int offset = pos % 8;
     int byte = pos / 8;
     if (offset == 0) {
+        // if position is byte aligned, just write it out
         dst->data->data[pos / 8] = value;
     } else {
+        // if position is not byte aligned, work around the byte boundary using bit masks
         unsigned char mask = (1 << offset) - 1;
         dst->data->data[byte] &= mask;
         dst->data->data[byte] |= (value << offset);
