@@ -35,4 +35,5 @@ Running `compressor` with no arguments will cause usage information to be printe
 -c: compress (default huffman)
 -i [infile]: set input file, - for stdin (default)
 -o [outfile]: set output file, - for stdout (default)
--b: benchmark algorithm performance without saving output```
+-b: benchmark algorithm performance without saving output
+Example: ./compressor -ba lzhf -i samples/loremipsum-100k.txt```
