@@ -70,7 +70,7 @@ The program will output to stdout or a file, specified with the argument `-i`.
 
 ## Final thoughts and further improvements
 
-The LZSS implementation is quite slow due to the use of a linear search in the dictionary string lookup function. Instead of KMP optimization, something like a chained hash table or a binary search tree would be preferable, but I couldn't wrap my head around the data structure within the time constraints of the course.
+The LZSS implementation is quite slow due to the use of a linear search in the dictionary string lookup function. Instead of KMP optimization, a chained hash table or a suffix tree would be preferable, but I couldn't wrap my head around managing the data structure in the context of the sliding window within the time constraints of the course.
 
 Improving LZSS compression speed would make it practical to use a larger dictionary and search phrase size, e.g. 16 and 8 bits for 65,535 and 256 bytes.
 

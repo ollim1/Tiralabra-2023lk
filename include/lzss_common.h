@@ -8,7 +8,6 @@
 #define TOKEN_LENGTH_BITS 4 // amount of bits for length of reference (max value 15)
 #define TOKEN_MAXLEN 15
 
-int findMatch(RingBuffer *haystack, Buffer *needle);
 int findMatchKMP(RingBuffer *haystack, Buffer *needle);
 void genKMPTable(Buffer *needle, int *table);
 

@@ -31,6 +31,23 @@ void delete_buffer(Buffer *buf)
 }
 
 /**
+ * Check Buffer equality
+ * @param a, b buffers to compare
+ */
+int buffer_equals(Buffer *a, Buffer *b)
+{
+    if (!a || !b)
+        return 0;
+    if (a->len != b->len)
+        return 0;
+    for (size_t i = 0; i < a->len; i++) {
+        if (a->data[i] != b->data[i])
+            return 0;
+    }
+    return 1;
+}
+
+/**
  * Duplicate a Buffer
  * @param src source Buffer
  */
@@ -77,11 +94,13 @@ void buffer_pad(Buffer *buf, size_t len)
     buf->len += len;
 }
 
+/**
+ * Truncate Buffer to only the last character. Useful when looking ahead in
+ * another data set.
+ * @param buf the Buffer
+ */
 void buffer_truncate(Buffer *buf)
 {
-    /*
-     * truncate Buffer to only the last character
-     */
     if (!buf)
         err_quit("null pointer truncating buffer");
     if (buf->len < 1)
@@ -90,12 +109,13 @@ void buffer_truncate(Buffer *buf)
     buf->len = 1;
 }
 
+/**
+ * Shrink buffer length by one.
+ * Boilerplate for more consistent operation
+ * @param buf the Buffer
+ */
 void buffer_shrink(Buffer *buf)
 {
-    /*
-     * shrink buffer length by one
-     * boilerplate for better readability
-     */
 
     if (!buf)
         err_quit("null pointer truncating buffer");
@@ -162,6 +182,13 @@ void delete_bufferreader(BufferReader *reader)
         free(reader);
 }
 
+/**
+ * Read buffer using BufferReader.
+ * @param reader the reader to use
+ * @param dst the destination to copy the data to
+ * @param len the amount of bytes to read
+ * @return number of bytes read, -1 if reader is final
+ */
 ssize_t bufferreader_read(BufferReader *reader, unsigned char *dst, size_t len)
 {
     if (!reader || !dst)
@@ -175,6 +202,11 @@ ssize_t bufferreader_read(BufferReader *reader, unsigned char *dst, size_t len)
     return total;
 }
 
+/**
+ * Check if buffer reader has reached the end of the buffer.
+ * @param reader the buffer to check
+ * @return 1 if true, 0 otherwise
+ */
 int bufferreader_isFinal(BufferReader *reader)
 {
     if (!reader)

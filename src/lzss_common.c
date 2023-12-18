@@ -1,35 +1,6 @@
 #include "../include/lzss_common.h"
 
 /**
- * Find string needle from ringbuffer haystack in reverse
- * @param haystack the RingBuffer to check
- * @param needle string to find in the the RingBuffer
- * @return index starting from the end of the array, or -1 if no match
- */
-int findMatch(RingBuffer *haystack, Buffer *needle)
-{
-
-    if (!haystack || !needle)
-        err_quit("null pointer in findMatch");
-
-    if (needle->len < 1 || haystack->len < 1)
-        return -1;
-    
-    for (int length = 0, distance = 0; distance < haystack->len && distance < WINDOW_SIZE; distance++) {
-        unsigned char c = ringbuffer_getRev(haystack, distance);
-        if (c == needle->data[needle->len - length - 1]) {
-            length++;
-        } else {
-            distance -= length - 1;
-            length = 0;
-        }
-        if (length >= needle->len)
-            return distance + 1;
-    }
-    return -1;
-}
-
-/**
  * Find string needle from ringbuffer haystack in order. Optimized using KMP
  * (Knuth-Morris-Pratt) algorithm.
  * @param haystack the RingBuffer to check

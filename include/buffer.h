@@ -24,6 +24,7 @@ Buffer *new_buffer();
 void delete_buffer(Buffer *);
 
 Buffer *buffer_copy(Buffer *buf);
+int buffer_equals(Buffer *a, Buffer *b);
 Buffer *buffer_copyl(Buffer *buf, size_t len);
 void buffer_concatl(Buffer *dest, Buffer *src, size_t len);
 void buffer_pad(Buffer *buf, size_t len);

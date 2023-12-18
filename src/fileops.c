@@ -31,10 +31,16 @@ void writeFile(Buffer *src, char *filename)
      * write buffer src to file specified by filename
      */
     int fd = 1; // setting stdout as default file descriptor
+    if (!src) {
+        err_quit("null pointer passed to writeFile");
+    }
     if (strcmp(filename, "-") != 0) {
         fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0666);
         if (fd <= 2)
             err_quit("failed to open file for writing");
+    }
+    if (src->len == 0) {
+        err_quit("buffer is empty, skipping write");
     }
     fprintf(stderr, "writing %ld bytes\n", src->len);
     unsigned char *ptr = src->data; // use a pointer to move in the buffer

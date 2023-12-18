@@ -50,48 +50,6 @@ START_TEST(testFindMatchKMP3)
 }
 END_TEST
 
-START_TEST(testFindMatch1)
-{
-    RingBuffer *haystack = new_ringbuffer(1000);
-    Buffer *needle = new_buffer();
-    unsigned char *strA = (unsigned char *)"aybabtu";
-    unsigned char *strB = (unsigned char *)"bab";
-    ringbuffer_appendString(haystack, strA, 7);
-    buffer_append(needle, strB, 3);
-
-    int result = findMatch(haystack, needle);
-    ck_assert_int_eq(result, 5);
-}
-END_TEST
-
-START_TEST(testFindMatch2)
-{
-    RingBuffer *haystack = new_ringbuffer(30);
-    Buffer *needle = new_buffer();
-    char *strA = "I AM SAM. I AM SAM. I AM SAM. I AM SAM. I AM SAM. I AM SAM. I AM SAM. I AM SAM.";
-    char *strB = "I AM SAM.";
-    ringbuffer_appendString(haystack, (unsigned char *)strA, strlen(strA) + 1);
-    buffer_append(needle, (unsigned char *)strB, strlen(strB) + 1);
-
-    int result = findMatch(haystack, needle);
-    ck_assert_int_eq(result, 10);
-}
-END_TEST
-
-START_TEST(testFindMatch3)
-{
-    RingBuffer *haystack = new_ringbuffer(30);
-    Buffer *needle = new_buffer();
-    char *strA = "";
-    char *strB = "I AM SAM.";
-    ringbuffer_appendString(haystack, (unsigned char *)strA, strlen(strA) + 1);
-    buffer_append(needle, (unsigned char *)strB, strlen(strB) + 1);
-
-    int result = findMatch(haystack, needle);
-    ck_assert_int_eq(result, -1);
-}
-END_TEST
-
 START_TEST(testEncodeLZSSPayload)
 {
     Buffer *buf = new_buffer();
@@ -268,9 +226,6 @@ Suite *lzss_suite(void)
     tcase_add_test(tc_core, testFindMatchKMP1);
     tcase_add_test(tc_core, testFindMatchKMP2);
     tcase_add_test(tc_core, testFindMatchKMP3);
-    tcase_add_test(tc_core, testFindMatch1);
-    tcase_add_test(tc_core, testFindMatch2);
-    tcase_add_test(tc_core, testFindMatch3);
     tcase_add_test(tc_core, testReadWriteToken);
     tcase_add_test(tc_core, testWriteToken);
     tcase_add_test(tc_core, testWriteToken2);

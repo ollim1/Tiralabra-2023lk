@@ -69,6 +69,9 @@ int main(int argc, char **argv)
     }
     fprintf(stderr, "reading from file %s\n", infile);
     Buffer *data = readFile(infile);
+    if (data->len == 0) {
+        err_quit("file is empty, skipping");
+    }
     Buffer *processed = NULL;
     switch (mode) {
         case COMPRESS:
@@ -141,6 +144,8 @@ int main(int argc, char **argv)
 
 void benchmark(Buffer *data, enum algorithm_enum algorithm)
 {
+    if (data->len == 0)
+        err_quit("file is empty, skipping");
     Buffer *(*compressFunction)(Buffer*) = NULL;
     Buffer *(*extractFunction)(Buffer*) = NULL;
     Buffer *compressed;
@@ -172,6 +177,10 @@ void benchmark(Buffer *data, enum algorithm_enum algorithm)
     }
     compressed = processData(data, compressFunction, COMPRESS);
     decompressed = processData(compressed, extractFunction, EXTRACT);
+
+    if (!buffer_equals(data, decompressed))
+        err_quit("mismatch between original and decompressed data");
+
     delete_buffer(compressed);
     delete_buffer(decompressed);
 }
