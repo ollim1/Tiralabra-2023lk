@@ -50,7 +50,7 @@ Buffer *lzss_byte_extract(Buffer *src)
 /**
  * Encode LZSS payload. Byte-level implementation. Byte literals are output
  * as-is, while tokens are prefixed by a 0xff byte. If the next byte is 0x00,
- * the token should be read as a 0xff literal.
+ * the token should be read as a 0xff literal. 
  * @param src the source Buffer
  * @param dst the destination Buffer
  */
@@ -132,6 +132,7 @@ int writeByteToken(Buffer *dst, unsigned distance, unsigned length)
     return 3; // return number of bytes written
 }
 
+
 /**
  * Write string of LZSS literals to Buffer. 0xff values are escaped using a
  * 0x00 byte afterward.
@@ -210,8 +211,7 @@ Buffer *decodeLZSSPayloadByteLevel(BufferReader *reader)
         bufferreader_read(reader, &byte, 1);
 
         if (byte == 0xff) {
-            // token byte, the next bytes will either indicate a two byte token or a one byte 0xff
-            // literal
+            // token byte, the next bytes will either indicate a two byte token or a one byte 0xff literal
             unsigned distance = 0;
             unsigned length = 0;
             if (readByteToken(reader, &distance, &length) < 1) {
@@ -226,8 +226,7 @@ Buffer *decodeLZSSPayloadByteLevel(BufferReader *reader)
             } else {
                 // copy string indicated by token
                 if (distance > output->len || output->len - distance + length > output->len) {
-                    fprintf(stderr, "distance:%5u, length:%3u, file length: %luB\n", distance,
-                            length, output->len);
+                    fprintf(stderr, "distance:%5u, length:%3u, file length: %luB\n", distance, length, output->len);
                     err_quit("token string out of bounds");
                 }
             }

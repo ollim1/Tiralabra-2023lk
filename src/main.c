@@ -11,11 +11,11 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-enum algorithm_enum { HUFFMAN = 0, LZSS, LZSS_BYTE, LZHF };
-enum mode_enum { COMPRESS = 0, EXTRACT, BENCHMARK };
+enum algorithm_enum {HUFFMAN = 0, LZSS, LZSS_BYTE, LZHF};
+enum mode_enum {COMPRESS = 0, EXTRACT, BENCHMARK};
 
 void usage();
-Buffer *processData(Buffer *data, Buffer *(*algorithmFunction)(Buffer *), enum mode_enum mode);
+Buffer *processData(Buffer *data, Buffer *(*algorithmFunction)(Buffer*), enum mode_enum mode);
 void benchmark(Buffer *data, enum algorithm_enum algorithm);
 
 Buffer *lzhf_compress(Buffer *data);
@@ -27,42 +27,44 @@ int main(int argc, char **argv)
     char *infile = "-", *outfile = "-";
     enum algorithm_enum algorithm = HUFFMAN;
     enum mode_enum mode = BENCHMARK;
-    Buffer *(*algorithmFunction)(Buffer *) = NULL;
+    Buffer *(*algorithmFunction)(Buffer*) = NULL;
     if (argc == 1)
         usage();
 
     while ((ch = getopt(argc, argv, "a:bcei:o:")) != -1) {
         switch (ch) {
-        case 'a':
-            if (strcmp(optarg, "huffman") == 0 || strcmp(optarg, "huff") == 0) {
-                algorithm = HUFFMAN;
-            } else if (strcmp(optarg, "lzss") == 0) {
-                algorithm = LZSS;
-            } else if (strcmp(optarg, "lzss-byte") == 0) {
-                algorithm = LZSS_BYTE;
-            } else if (strcmp(optarg, "lzhf") == 0 || strcmp(optarg, "lzss-huff") == 0 ||
-                       strcmp(optarg, "lzss-huffman") == 0) {
-                algorithm = LZHF;
-            } else
-                fprintf(stderr, "Unknown algorithm: %s\n", optarg);
-            break;
-        case 'b':
-            mode = BENCHMARK;
-            break;
-        case 'c':
-            mode = COMPRESS;
-            break;
-        case 'e':
-            mode = EXTRACT;
-            break;
-        case 'i':
-            infile = optarg;
-            break;
-        case 'o':
-            outfile = optarg;
-            break;
-        default:
-            usage();
+            case 'a':
+                if (strcmp(optarg, "huffman") == 0
+                        || strcmp(optarg, "huff") == 0) {
+                    algorithm = HUFFMAN;
+                } else if (strcmp(optarg, "lzss") == 0) {
+                    algorithm = LZSS;
+                } else if (strcmp(optarg, "lzss-byte") == 0) {
+                    algorithm = LZSS_BYTE;
+                } else if (strcmp(optarg, "lzhf") == 0
+                        || strcmp(optarg, "lzss-huff") == 0
+                        || strcmp(optarg, "lzss-huffman") == 0) {
+                    algorithm = LZHF;
+                } else
+                    fprintf(stderr, "Unknown algorithm: %s\n", optarg);
+                break;
+            case 'b':
+                mode = BENCHMARK;
+                break;
+            case 'c':
+                mode = COMPRESS;
+                break;
+            case 'e':
+                mode = EXTRACT;
+                break;
+            case 'i':
+                infile = optarg;
+                break;
+            case 'o':
+                outfile = optarg;
+                break;
+            default:
+                usage();
         }
     }
     fprintf(stderr, "reading from file %s\n", infile);
@@ -72,58 +74,58 @@ int main(int argc, char **argv)
     }
     Buffer *processed = NULL;
     switch (mode) {
-    case COMPRESS:
-        fprintf(stderr, "will compress\n");
-        switch (algorithm) {
-        case HUFFMAN:
-            fprintf(stderr, "using huffman algorithm\n");
-            algorithmFunction = huffman_compress;
+        case COMPRESS:
+            fprintf(stderr, "will compress\n");
+            switch (algorithm) {
+                case HUFFMAN:
+                    fprintf(stderr, "using huffman algorithm\n");
+                    algorithmFunction = huffman_compress;
+                    break;
+                case LZSS:
+                    fprintf(stderr, "using lzss algorithm\n");
+                    algorithmFunction = lzss_compress;
+                    break;
+                case LZSS_BYTE:
+                    fprintf(stderr, "using lzss-byte algorithm\n");
+                    algorithmFunction = lzss_byte_compress;
+                    break;
+                case LZHF:
+                    fprintf(stderr, "using nested lzss-byte and huffman algorithms\n");
+                    algorithmFunction = lzhf_compress;
+                    break;
+                default:
+                    break;
+            }
             break;
-        case LZSS:
-            fprintf(stderr, "using lzss algorithm\n");
-            algorithmFunction = lzss_compress;
+        case EXTRACT:
+            fprintf(stderr, "will extract\n");
+            switch (algorithm) {
+                case HUFFMAN:
+                    fprintf(stderr, "using huffman algorithm\n");
+                    algorithmFunction = huffman_extract;
+                    break;
+                case LZSS:
+                    fprintf(stderr, "using lzss algorithm\n");
+                    algorithmFunction = lzss_extract;
+                    break;
+                case LZSS_BYTE:
+                    fprintf(stderr, "using lzss-byte algorithm\n");
+                    algorithmFunction = lzss_byte_extract;
+                    break;
+                case LZHF:
+                    fprintf(stderr, "using nested lzss-byte and huffman algorithms\n");
+                    algorithmFunction = lzhf_extract;
+                    break;
+                default:
+                    break;
+            }
             break;
-        case LZSS_BYTE:
-            fprintf(stderr, "using lzss-byte algorithm\n");
-            algorithmFunction = lzss_byte_compress;
-            break;
-        case LZHF:
-            fprintf(stderr, "using nested lzss-byte and huffman algorithms\n");
-            algorithmFunction = lzhf_compress;
+        case BENCHMARK:
+            fprintf(stderr, "will benchmark\n");
             break;
         default:
+            err_quit("no mode set, exiting");
             break;
-        }
-        break;
-    case EXTRACT:
-        fprintf(stderr, "will extract\n");
-        switch (algorithm) {
-        case HUFFMAN:
-            fprintf(stderr, "using huffman algorithm\n");
-            algorithmFunction = huffman_extract;
-            break;
-        case LZSS:
-            fprintf(stderr, "using lzss algorithm\n");
-            algorithmFunction = lzss_extract;
-            break;
-        case LZSS_BYTE:
-            fprintf(stderr, "using lzss-byte algorithm\n");
-            algorithmFunction = lzss_byte_extract;
-            break;
-        case LZHF:
-            fprintf(stderr, "using nested lzss-byte and huffman algorithms\n");
-            algorithmFunction = lzhf_extract;
-            break;
-        default:
-            break;
-        }
-        break;
-    case BENCHMARK:
-        fprintf(stderr, "will benchmark\n");
-        break;
-    default:
-        err_quit("no mode set, exiting");
-        break;
     }
 
     if (mode != BENCHMARK) {
@@ -144,34 +146,34 @@ void benchmark(Buffer *data, enum algorithm_enum algorithm)
 {
     if (data->len == 0)
         err_quit("file is empty, skipping");
-    Buffer *(*compressFunction)(Buffer *) = NULL;
-    Buffer *(*extractFunction)(Buffer *) = NULL;
+    Buffer *(*compressFunction)(Buffer*) = NULL;
+    Buffer *(*extractFunction)(Buffer*) = NULL;
     Buffer *compressed;
     Buffer *decompressed;
     switch (algorithm) {
-    case HUFFMAN:
-        fprintf(stderr, "testing huffman algorithm\n");
-        compressFunction = huffman_compress;
-        extractFunction = huffman_extract;
-        break;
-    case LZSS:
-        fprintf(stderr, "testing lzss algorithm\n");
-        compressFunction = lzss_compress;
-        extractFunction = lzss_extract;
-        break;
-    case LZSS_BYTE:
-        fprintf(stderr, "testing lzss-byte algorithm\n");
-        compressFunction = lzss_byte_compress;
-        extractFunction = lzss_byte_extract;
-        break;
-    case LZHF:
-        fprintf(stderr, "testing nested lzss-byte and huffman algorithms\n");
-        compressFunction = lzhf_compress;
-        extractFunction = lzhf_extract;
-        break;
-    default:
-        err_quit("no valid algorithm set for benchmark");
-        break;
+        case HUFFMAN:
+            fprintf(stderr, "testing huffman algorithm\n");
+            compressFunction = huffman_compress;
+            extractFunction = huffman_extract;
+            break;
+        case LZSS:
+            fprintf(stderr, "testing lzss algorithm\n");
+            compressFunction = lzss_compress;
+            extractFunction = lzss_extract;
+            break;
+        case LZSS_BYTE:
+            fprintf(stderr, "testing lzss-byte algorithm\n");
+            compressFunction = lzss_byte_compress;
+            extractFunction = lzss_byte_extract;
+            break;
+        case LZHF:
+            fprintf(stderr, "testing nested lzss-byte and huffman algorithms\n");
+            compressFunction = lzhf_compress;
+            extractFunction = lzhf_extract;
+            break;
+        default:
+            err_quit("no valid algorithm set for benchmark");
+            break;
     }
     compressed = processData(data, compressFunction, COMPRESS);
     decompressed = processData(compressed, extractFunction, EXTRACT);
@@ -183,7 +185,7 @@ void benchmark(Buffer *data, enum algorithm_enum algorithm)
     delete_buffer(decompressed);
 }
 
-Buffer *processData(Buffer *data, Buffer *(*algorithmFunction)(Buffer *), enum mode_enum mode)
+Buffer *processData(Buffer *data, Buffer *(*algorithmFunction)(Buffer*), enum mode_enum mode)
 {
     struct timeval before, after, difference;
     gettimeofday(&before, NULL);
@@ -192,12 +194,13 @@ Buffer *processData(Buffer *data, Buffer *(*algorithmFunction)(Buffer *), enum m
 
     gettimeofday(&after, NULL);
     timersub(&after, &before, &difference);
-    fprintf(stderr, "%s took %ld.%07ld seconds\n", mode == COMPRESS ? "compression" : "extraction",
-            (long int) difference.tv_sec, (long int) difference.tv_usec);
+    fprintf(stderr, "%s took %ld.%07ld seconds\n",
+            mode == COMPRESS ? "compression" : "extraction",
+            (long int)difference.tv_sec, (long int) difference.tv_usec);
     if (mode == COMPRESS)
         fprintf(stderr, "compression ratio is %.1lf%%\n",
                 ((double) data->len) / ((double) processed->len) * 100.0);
-    else
+    else 
         fprintf(stderr, "compression ratio is %.1lf%%\n",
                 ((double) processed->len) / ((double) data->len) * 100.0);
 

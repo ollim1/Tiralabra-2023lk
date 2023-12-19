@@ -168,7 +168,7 @@ void bitarray_concat(BitArray *a, BitArray *b)
 {
     if (!a || !b)
         err_quit("null pointer when concatenating BitArrays");
-
+    
     bitarray_concatl(a, b, b->len);
 }
 
@@ -185,7 +185,7 @@ void bitarray_concatl(BitArray *a, BitArray *b, size_t len)
      */
     if (!a || !b)
         err_quit("null pointer when concatenating BitArrays");
-
+    
     bitarray_appendString(a, b->data->data, (len < b->len ? len : b->len));
 }
 
@@ -399,7 +399,7 @@ int bitarrayreader_readBit(BitArrayReader *reader, int *dst)
         err_quit("null pointer accessing bitarrayreader");
     if (reader->pos >= reader->data->len)
         return -1;
-
+    
     *dst = bitarray_get(reader->data, reader->pos);
     reader->pos++;
     return 1;
@@ -418,7 +418,7 @@ int bitarrayreader_readByte(BitArrayReader *br, unsigned char *dst)
         err_quit("null pointer accessing bitarrayreader");
     if (br->pos + 8 > br->data->len)
         return -1;
-
+    
     *dst = bitarray_getByte(br->data, br->pos);
     br->pos += 8;
     return 8;
@@ -463,7 +463,7 @@ size_t bitarrayreader_readInteger(BitArrayReader *src)
      * decode integer
      */
     int end = 0;
-
+    
     if (bitarrayreader_readBit(src, &end) != 1)
         err_quit("failed to read bit in decodeLength");
 

@@ -12,8 +12,8 @@ START_TEST(testFindMatchKMP1)
 {
     RingBuffer *haystack = new_ringbuffer(1000);
     Buffer *needle = new_buffer();
-    unsigned char *strA = (unsigned char *) "aybabtu";
-    unsigned char *strB = (unsigned char *) "bab";
+    unsigned char *strA = (unsigned char *)"aybabtu";
+    unsigned char *strB = (unsigned char *)"bab";
     ringbuffer_appendString(haystack, strA, 7);
     buffer_append(needle, strB, 3);
 
@@ -28,8 +28,8 @@ START_TEST(testFindMatchKMP2)
     Buffer *needle = new_buffer();
     char *strA = "I AM SAM. I AM SAM. I AM SAM. I AM SAM. I AM SAM. I AM SAM. I AM SAM. I AM SAM.";
     char *strB = "I AM SAM.";
-    ringbuffer_appendString(haystack, (unsigned char *) strA, strlen(strA) + 1);
-    buffer_append(needle, (unsigned char *) strB, strlen(strB) + 1);
+    ringbuffer_appendString(haystack, (unsigned char *)strA, strlen(strA) + 1);
+    buffer_append(needle, (unsigned char *)strB, strlen(strB) + 1);
 
     int result = findMatchKMP(haystack, needle);
     ck_assert_int_eq(result, 10);
@@ -42,8 +42,8 @@ START_TEST(testFindMatchKMP3)
     Buffer *needle = new_buffer();
     char *strA = "";
     char *strB = "I AM SAM.";
-    ringbuffer_appendString(haystack, (unsigned char *) strA, strlen(strA) + 1);
-    buffer_append(needle, (unsigned char *) strB, strlen(strB) + 1);
+    ringbuffer_appendString(haystack, (unsigned char *)strA, strlen(strA) + 1);
+    buffer_append(needle, (unsigned char *)strB, strlen(strB) + 1);
 
     int result = findMatchKMP(haystack, needle);
     ck_assert_int_eq(result, -1);
@@ -53,7 +53,7 @@ END_TEST
 START_TEST(testEncodeLZSSPayload)
 {
     Buffer *buf = new_buffer();
-    unsigned char *str = (unsigned char *) "I AM SAM. I AM SAM.";
+    unsigned char *str = (unsigned char *)"I AM SAM. I AM SAM."; 
     buffer_append(buf, str, 19);
     BitArray *result = new_bitarray();
     encodeLZSSPayloadBitLevel(buf, result);
@@ -85,7 +85,7 @@ END_TEST
 START_TEST(testDecodeLZSSPayload)
 {
     Buffer *buf = new_buffer();
-    unsigned char *str = (unsigned char *) "I AM SAM. I AM SAM.";
+    unsigned char *str = (unsigned char *)"I AM SAM. I AM SAM."; 
     buffer_append(buf, str, 19);
     BitArray *compressed = new_bitarray();
     bitarray_append(compressed, 0);
@@ -180,7 +180,7 @@ START_TEST(testEncodeDecodeLZSSPayload)
     Buffer *src = new_buffer();
     char *str = "jiopfwejfopfmwealfnn09v09a8g-afewjopf23rn;jfsaf";
     size_t len = strlen(str) + 1;
-    buffer_append(src, (unsigned char *) str, len);
+    buffer_append(src, (unsigned char *)str, len);
     BitArray *ba = new_bitarray();
     encodeLZSSPayloadBitLevel(src, ba);
     BitArrayReader *reader = bitarray_createReader(ba);
@@ -194,7 +194,7 @@ START_TEST(testEncodeDecodeLZSSPayload2)
     Buffer *src = new_buffer();
     char *str = "fjowipaejfeo902380-29qui3r-f0efci0-eareqw-r";
     size_t len = strlen(str) + 1;
-    buffer_append(src, (unsigned char *) str, len);
+    buffer_append(src, (unsigned char *)str, len);
     BitArray *ba = new_bitarray();
     encodeLZSSPayloadBitLevel(src, ba);
     BitArrayReader *reader = bitarray_createReader(ba);
@@ -208,7 +208,7 @@ START_TEST(testEncodeDecodeLZSSPayload3)
     Buffer *src = new_buffer();
     char *str = "";
     size_t len = strlen(str) + 1;
-    buffer_append(src, (unsigned char *) str, len);
+    buffer_append(src, (unsigned char *)str, len);
     BitArray *ba = new_bitarray();
     encodeLZSSPayloadBitLevel(src, ba);
     BitArrayReader *reader = bitarray_createReader(ba);
@@ -238,6 +238,7 @@ Suite *lzss_suite(void)
 
     return s;
 }
+
 
 int main(void)
 {

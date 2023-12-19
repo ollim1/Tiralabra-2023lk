@@ -95,8 +95,8 @@ END_TEST
 START_TEST(test_ringbuffer_append_get)
 {
     RingBuffer *buf = new_ringbuffer(5);
-    ringbuffer_appendString(buf, (unsigned char *) "aybabtu", 7);
-    ck_assert_mem_eq(buf->data, (unsigned char *) "tubab", 5);
+    ringbuffer_appendString(buf, (unsigned char *)"aybabtu", 7);
+    ck_assert_mem_eq(buf->data, (unsigned char *)"tubab", 5);
     ck_assert_int_eq(ringbuffer_get(buf, 0), 'b');
     ck_assert_int_eq(ringbuffer_getRev(buf, 0), 'u');
     delete_ringbuffer(buf);
@@ -118,8 +118,8 @@ Suite *ringbuffer_suite(void)
 
 int test_comparator(void *a, void *b)
 {
-    int left = *(int *) a;
-    int right = *(int *) b;
+    int left = *(int *)a;
+    int right = *(int *)b;
     if (left < right)
         return -1;
     else if (left > right)
@@ -144,7 +144,7 @@ START_TEST(test_queue_insert_peek)
     int a[5] = {1, 2, 3, 4, 5};
     for (int i = 0; i < 5; i++)
         queue_insert(queue, &(a[i]));
-    ck_assert_int_gt(*(int *) queue_peek(queue), 0);
+    ck_assert_int_gt(*(int *)queue_peek(queue), 0);
 
     delete_queue(queue);
 }
@@ -174,7 +174,7 @@ START_TEST(test_queue_is_sorted)
         queue_insert(queue, &(a[i]));
     int sorted[5] = {20, 15, 10, 1, -12};
     for (int i = 0; i < 5; i++) {
-        int temp = *(int *) queue_pop(queue);
+        int temp = *(int *)queue_pop(queue);
         ck_assert_int_eq(temp, sorted[i]);
     }
     delete_queue(queue);
@@ -364,7 +364,7 @@ START_TEST(test_bitarray_toBuffer)
     BitArray *ba = new_bitarray();
     bitarray_appendString(ba, (unsigned char *) "abc", 32);
     Buffer *result = bitarray_toBuffer(ba);
-    ck_assert_int_eq(strncmp((unsigned char *) result->data, "abc", 4), 0);
+    ck_assert_int_eq(strncmp((unsigned char *)result->data, "abc", 4), 0);
 }
 END_TEST
 

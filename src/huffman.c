@@ -38,8 +38,7 @@ Buffer *huffman_compress(Buffer *src)
     size_t diff = output->len;
     huffnode_serialize(tree, output);
     diff = output->len - diff;
-    fprintf(stderr, "size of serialized Huffman tree: %lu bits (%lu bytes)\n", diff,
-            (diff - 1) / 8 + 1);
+    fprintf(stderr, "size of serialized Huffman tree: %lu bits (%lu bytes)\n", diff, (diff - 1) / 8 + 1);
     // encode payload
     encodeHuffmanPayload(src, output, codes);
 
@@ -62,7 +61,7 @@ void encodeHuffmanPayload(Buffer *src, BitArray *dst, BitArray **codes)
 {
     if (!src || !dst || !codes)
         err_quit("null pointer in encodeHuffmanPayload");
-
+    
     for (size_t i = 0; i < src->len; i++) {
         BitArray *traversal = codes[src->data[i]];
         if (!traversal)
@@ -85,7 +84,7 @@ HuffNode *buildHufftree(Buffer *src)
 {
     size_t freqs[MAX_LEAVES] = {0}; // frequency of every 8-bit integer value
     for (size_t i = 0; i < src->len; i++) {
-        freqs[(int) src->data[i]]++;
+        freqs[(int)src->data[i]]++;
     }
 
     PriorityQueue *queue = new_queue(huffnode_compare);
