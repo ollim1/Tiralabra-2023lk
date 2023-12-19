@@ -1,0 +1,6 @@
+BasedOnStyle: llvm
+IndentWidth: 4
+BreakBeforeBraces: Linux
+SpaceAfterCStyleCast: true
+ColumnLimit: 100
+SortIncludes: Never
