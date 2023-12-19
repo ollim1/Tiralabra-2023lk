@@ -140,7 +140,6 @@ START_TEST(test_deserialize_hufftree)
 }
 END_TEST
 
-
 START_TEST(test_buildHufftree)
 {
     Buffer *buf = new_buffer();
@@ -172,15 +171,15 @@ START_TEST(test_cacheHuffcodes)
 
     BitArray *expected = new_bitarray_fromStringl("0", 1);
     ck_assert_ptr_nonnull(codes['a']);
-    ck_assert_int_eq(bitarray_equals(codes['a'], expected), 1); 
+    ck_assert_int_eq(bitarray_equals(codes['a'], expected), 1);
     delete_bitarray(expected);
     expected = new_bitarray_fromStringl("10", 2);
     ck_assert_ptr_nonnull(codes['b']);
-    ck_assert_int_eq(bitarray_equals(codes['b'], expected), 1); 
+    ck_assert_int_eq(bitarray_equals(codes['b'], expected), 1);
     delete_bitarray(expected);
     expected = new_bitarray_fromStringl("11", 2);
     ck_assert_ptr_nonnull(codes['c']);
-    ck_assert_int_eq(bitarray_equals(codes['c'], expected), 1); 
+    ck_assert_int_eq(bitarray_equals(codes['c'], expected), 1);
     delete_bitarray(expected);
     delete_huffnode(abc);
 }
@@ -190,7 +189,7 @@ START_TEST(test_encodeHuffmanPayload)
 {
     BitArray *codes[MAX_LEAVES + 1] = {NULL};
     Buffer *src = new_buffer();
-    buffer_append(src, (unsigned char *)"aaabbc", 6);
+    buffer_append(src, (unsigned char *) "aaabbc", 6);
     codes['a'] = new_bitarray_fromStringl("0", 1);
     codes['b'] = new_bitarray_fromStringl("10", 2);
     codes['c'] = new_bitarray_fromStringl("11", 2);
@@ -216,10 +215,10 @@ START_TEST(test_decodeHuffmanPayload)
     HuffNode *bc = huffnode_createParent(b, c);
     HuffNode *abc = huffnode_createParent(a, bc);
 
-    BitArray *src = new_bitarray_fromStringl("000101011",9);
+    BitArray *src = new_bitarray_fromStringl("000101011", 9);
     BitArrayReader *reader = bitarray_createReader(src);
     Buffer *decoded = decodeHuffmanPayload(reader, abc, 6);
-    char *result = (char *)decoded->data;
+    char *result = (char *) decoded->data;
     ck_assert_int_eq(strncmp("aaabbc", result, 6), 0);
 }
 END_TEST
@@ -229,10 +228,10 @@ START_TEST(test_huffman_compress_decompress_1)
     // hello world
     Buffer *src = new_buffer();
     char *str1 = "Hello, world!";
-    buffer_append(src, (unsigned char *)str1, strlen(str1) + 1);
+    buffer_append(src, (unsigned char *) str1, strlen(str1) + 1);
     Buffer *compressed = huffman_compress(src);
     Buffer *result = huffman_extract(compressed);
-    ck_assert_str_eq((char *)result->data, str1);
+    ck_assert_str_eq((char *) result->data, str1);
 }
 END_TEST
 
@@ -241,10 +240,10 @@ START_TEST(test_huffman_compress_decompress_2)
     // numbers
     Buffer *src = new_buffer();
     char *str1 = "20\n15\n10\n1\n-12";
-    buffer_append(src, (unsigned char *)str1, strlen(str1) + 1);
+    buffer_append(src, (unsigned char *) str1, strlen(str1) + 1);
     Buffer *compressed = huffman_compress(src);
     Buffer *result = huffman_extract(compressed);
-    ck_assert_str_eq((char *)result->data, str1);
+    ck_assert_str_eq((char *) result->data, str1);
 }
 END_TEST
 
@@ -253,10 +252,10 @@ START_TEST(test_huffman_compress_decompress_3)
     // same character
     Buffer *src = new_buffer();
     char *str1 = "\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa";
-    buffer_append(src, (unsigned char *)str1, strlen(str1) + 1);
+    buffer_append(src, (unsigned char *) str1, strlen(str1) + 1);
     Buffer *compressed = huffman_compress(src);
     Buffer *result = huffman_extract(compressed);
-    ck_assert_str_eq((char *)result->data, str1);
+    ck_assert_str_eq((char *) result->data, str1);
 }
 END_TEST
 
@@ -265,13 +264,13 @@ START_TEST(test_huffman_compress_decompress_4)
     Buffer *src = new_buffer();
     int i;
     for (i = 1; i < 256; i++) {
-        buffer_append(src, (unsigned char *)&i, 1);
+        buffer_append(src, (unsigned char *) &i, 1);
     }
     i = 0;
-    buffer_append(src, (unsigned char *)&i, 1);
+    buffer_append(src, (unsigned char *) &i, 1);
     Buffer *compressed = huffman_compress(src);
     Buffer *result = huffman_extract(compressed);
-    ck_assert_str_eq((char *)result->data, src->data);
+    ck_assert_str_eq((char *) result->data, src->data);
 }
 END_TEST
 

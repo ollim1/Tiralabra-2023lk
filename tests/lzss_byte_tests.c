@@ -10,14 +10,14 @@
 START_TEST(testDecodeLZSSPayload)
 {
     Buffer *buf = new_buffer();
-    unsigned char *str = (unsigned char *)"I AM SAM. I AM SAM."; 
+    unsigned char *str = (unsigned char *) "I AM SAM. I AM SAM.";
     buffer_append(buf, str, 19);
     Buffer *compressed = new_buffer();
 
-    buffer_append(compressed, (unsigned char *)"I AM S", 6);
+    buffer_append(compressed, (unsigned char *) "I AM S", 6);
     // append token for "AM"stored in little-endian format
     writeByteToken(compressed, 4, 2);
-    buffer_append(compressed, (unsigned char *)". ", 2);
+    buffer_append(compressed, (unsigned char *) ". ", 2);
     writeByteToken(compressed, 10, 9);
     BufferReader *reader = buffer_createReader(compressed);
     Buffer *decompressed = decodeLZSSPayloadByteLevel(reader);
@@ -31,7 +31,7 @@ START_TEST(testEncodeDecodeLZSSPayload)
     Buffer *src = new_buffer();
     char *str = "jiopfwejfopfmwealfnn09v09a8g-afewjopf23rn;jfsaf";
     size_t len = strlen(str) + 1;
-    buffer_append(src, (unsigned char *)str, len);
+    buffer_append(src, (unsigned char *) str, len);
     Buffer *compressed = new_buffer();
     encodeLZSSPayloadByteLevel(src, compressed);
     BufferReader *reader = buffer_createReader(compressed);
@@ -45,7 +45,7 @@ START_TEST(testEncodeDecodeLZSSPayload2)
     Buffer *src = new_buffer();
     char *str = "fjowipaejfeo902380-29qui3r-f0efci0-eareqw-r";
     size_t len = strlen(str) + 1;
-    buffer_append(src, (unsigned char *)str, len);
+    buffer_append(src, (unsigned char *) str, len);
     Buffer *compressed = new_buffer();
     encodeLZSSPayloadByteLevel(src, compressed);
     BufferReader *reader = buffer_createReader(compressed);
@@ -59,7 +59,7 @@ START_TEST(testEncodeDecodeLZSSPayload3)
     Buffer *src = new_buffer();
     char *str = "";
     size_t len = strlen(str) + 1;
-    buffer_append(src, (unsigned char *)str, len);
+    buffer_append(src, (unsigned char *) str, len);
     Buffer *compressed = new_buffer();
     encodeLZSSPayloadByteLevel(src, compressed);
     BufferReader *reader = buffer_createReader(compressed);
@@ -82,7 +82,6 @@ Suite *lzss_suite(void)
 
     return s;
 }
-
 
 int main(void)
 {

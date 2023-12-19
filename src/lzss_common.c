@@ -20,7 +20,7 @@ int findMatchKMP(RingBuffer *haystack, Buffer *needle)
 
     int KMPTable[TOKEN_MAXLEN] = {0};
     genKMPTable(needle, KMPTable);
-    
+
     while (ringBufferPosition < haystack->len && ringBufferPosition < WINDOW_SIZE) {
         unsigned char c = ringbuffer_get(haystack, ringBufferPosition);
         if (c == needle->data[matchPosition]) {
@@ -31,7 +31,7 @@ int findMatchKMP(RingBuffer *haystack, Buffer *needle)
         } else {
             matchPosition = KMPTable[matchPosition];
             if (matchPosition < 0) {
-                // match was reset, 
+                // match was reset,
                 ringBufferPosition++;
                 matchPosition++;
             }
@@ -61,4 +61,3 @@ void genKMPTable(Buffer *needle, int *table)
         }
     }
 }
-

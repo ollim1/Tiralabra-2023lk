@@ -11,8 +11,8 @@ int huffnode_compare(void *left, void *right)
      */
     if (!left || !right)
         err_quit("comparing null pointers");
-    HuffNode *a = (HuffNode *)left;
-    HuffNode *b = (HuffNode *)right;
+    HuffNode *a = (HuffNode *) left;
+    HuffNode *b = (HuffNode *) right;
 
     return b->key - a->key;
 }
@@ -35,8 +35,7 @@ int huffnode_equals(HuffNode *node1, HuffNode *node2)
      * check if tree at node1 is equal to tree at node2
      */
     if (!node1 || !node2) {
-        fprintf(stderr, "tree asymmetry: left %s, %s",
-                !node1 ? "is null" : "is not null",
+        fprintf(stderr, "tree asymmetry: left %s, %s", !node1 ? "is null" : "is not null",
                 !node2 ? "is null" : "is not null");
         return 0;
     }
@@ -45,11 +44,11 @@ int huffnode_equals(HuffNode *node1, HuffNode *node2)
         if (node1->value == node2->value) {
             return 1;
         } else {
-            fprintf(stderr, "tree values different: left: %d, %d",
-                    (int) node1->value, (int) node2->value);
+            fprintf(stderr, "tree values different: left: %d, %d", (int) node1->value,
+                    (int) node2->value);
             return 0;
         }
-            
+
     } else if (huffnode_isLeaf(node1) || huffnode_isLeaf(node2)) {
         fprintf(stderr, "tree asymmetry: left %s, %s",
                 huffnode_isLeaf(node1) == 1 ? "is leaf" : "is not leaf",
@@ -57,8 +56,7 @@ int huffnode_equals(HuffNode *node1, HuffNode *node2)
         return 0;
     }
 
-    return huffnode_equals(node1->left, node2->left)
-        && huffnode_equals(node1->right, node2->right);
+    return huffnode_equals(node1->left, node2->left) && huffnode_equals(node1->right, node2->right);
 }
 
 void delete_huffnode(HuffNode *node)

@@ -27,4 +27,3 @@ void *mcalloc(size_t nmemb, size_t size)
         err_sys("calloc");
     return ret;
 }
-

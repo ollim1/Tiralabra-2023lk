@@ -123,7 +123,8 @@ Buffer *decodeLZSSPayloadBitLevel(BitArrayReader *reader, size_t decoded_length)
                 err_quit("unexpected end of file while reading payload token");
             // copy string indicated by token
             if (distance > output->len || output->len - distance + length > output->len) {
-                fprintf(stderr, "distance:%5u, length:%3u, file length: %lu\n", distance, length, output->len);
+                fprintf(stderr, "distance:%5u, length:%3u, file length: %lu\n", distance, length,
+                        output->len);
                 err_quit("token string out of bounds");
             }
             buffer_append(temp, &output->data[output->len - distance], length);
@@ -189,7 +190,7 @@ void writeToken(BitArray *dst, unsigned distance, unsigned length)
 
 /**
  * Read LZSS reference token.
- * @param reader reader for source BitArray 
+ * @param reader reader for source BitArray
  * @param distance pointer to distance variable
  * @param length pointer to length variable
  * @return amount of bits read

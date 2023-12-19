@@ -5,4 +5,3 @@
 ssize_t calcRevIndex(RingBuffer *rb, size_t pos);
 ssize_t calcIndex(RingBuffer *rb, size_t pos);
 #endif
-
