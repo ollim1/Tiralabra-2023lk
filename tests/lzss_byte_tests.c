@@ -5,6 +5,7 @@
 #include "../include/lzss_common.h"
 #include "../include/lzss_byte.h"
 #include "../include/lzss_byte_private.h"
+#include "../include/fileops.h"
 #include "../include/ringbuffer.h"
 
 START_TEST(testDecodeLZSSPayload)
@@ -68,17 +69,62 @@ START_TEST(testEncodeDecodeLZSSPayload3)
 }
 END_TEST
 
+START_TEST(testCompressDecompressByte1)
+{
+    Buffer *src = new_buffer();
+    Buffer *file = readFile("samples/bliss-sample.bin");
+    Buffer *compressed = lzss_byte_compress(file);
+    Buffer *result = lzss_byte_extract(compressed);
+    ck_assert_int_eq(buffer_equals(result, file), 1);
+    delete_buffer(file);
+    delete_buffer(compressed);
+    delete_buffer(result);
+}
+END_TEST
+
+START_TEST(testCompressDecompressByte2)
+{
+    Buffer *src = new_buffer();
+    Buffer *file = readFile("samples/loremipsum-100k.txt");
+    Buffer *compressed = lzss_byte_compress(file);
+    Buffer *result = lzss_byte_extract(compressed);
+    ck_assert_int_eq(buffer_equals(result, file), 1);
+    delete_buffer(file);
+    delete_buffer(compressed);
+    delete_buffer(result);
+}
+END_TEST
+
+START_TEST(testCompressDecompressByte3)
+{
+    Buffer *src = new_buffer();
+    Buffer *file = readFile("samples/ff.bin");
+    Buffer *compressed = lzss_byte_compress(file);
+    Buffer *result = lzss_byte_extract(compressed);
+    ck_assert_int_eq(buffer_equals(result, file), 1);
+    delete_buffer(file);
+    delete_buffer(compressed);
+    delete_buffer(result);
+}
+END_TEST
+
 Suite *lzss_suite(void)
 {
     Suite *s;
-    TCase *tc_core;
+    TCase *tc_unit;
     s = suite_create("LZSS-byte");
-    tc_core = tcase_create("Core");
-    tcase_add_test(tc_core, testDecodeLZSSPayload);
-    tcase_add_test(tc_core, testEncodeDecodeLZSSPayload);
-    tcase_add_test(tc_core, testEncodeDecodeLZSSPayload2);
-    tcase_add_test(tc_core, testEncodeDecodeLZSSPayload3);
-    suite_add_tcase(s, tc_core);
+    tc_unit = tcase_create("Unit");
+    tcase_add_test(tc_unit, testDecodeLZSSPayload);
+    tcase_add_test(tc_unit, testEncodeDecodeLZSSPayload);
+    tcase_add_test(tc_unit, testEncodeDecodeLZSSPayload2);
+    tcase_add_test(tc_unit, testEncodeDecodeLZSSPayload3);
+    TCase *tc_int = tcase_create("Integration");
+    tcase_set_timeout(tc_int, 10);
+    tcase_add_test(tc_int, testCompressDecompressByte1);
+    tcase_add_test(tc_int, testCompressDecompressByte2);
+    tcase_add_test(tc_int, testCompressDecompressByte3);
+    suite_add_tcase(s, tc_unit);
+    suite_add_tcase(s, tc_int);
 
     return s;
 }

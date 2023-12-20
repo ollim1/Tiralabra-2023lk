@@ -48,17 +48,6 @@ int buffer_equals(Buffer *a, Buffer *b)
 }
 
 /**
- * Duplicate a Buffer
- * @param src source Buffer
- */
-Buffer *buffer_copy(Buffer *src)
-{
-    if (!src)
-        err_quit("null pointer duplicating buffer");
-    return buffer_copyl(src, src->len);
-}
-
-/**
  * Duplicate a Buffer up to len bytes.
  * @param src source Buffer
  * @param len length limit of new Buffer
@@ -107,21 +96,6 @@ void buffer_truncate(Buffer *buf)
         return;
     buf->data[0] = buf->data[buf->len - 1];
     buf->len = 1;
-}
-
-/**
- * Shrink buffer length by one.
- * Boilerplate for more consistent operation
- * @param buf the Buffer
- */
-void buffer_shrink(Buffer *buf)
-{
-
-    if (!buf)
-        err_quit("null pointer truncating buffer");
-    if (buf->len < 1)
-        return;
-    buf->len--;
 }
 
 void buffer_concatl(Buffer *dest, Buffer *src, size_t len)

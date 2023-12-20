@@ -20,6 +20,7 @@ Continued from 2023/LK.
 ### [Week 5](doc/week5.md)
 ### [Week 6](doc/week6.md)
 ### [Week 7](doc/week7.md)
+### [Week 8](doc/week8.md)
 
 ## Usage
 

@@ -4,3 +4,6 @@ BreakBeforeBraces: Linux
 SpaceAfterCStyleCast: true
 ColumnLimit: 100
 SortIncludes: Never
+IndentCaseBlocks: true
+IndentCaseLabels: true
+AlignAfterOpenBracket: Align

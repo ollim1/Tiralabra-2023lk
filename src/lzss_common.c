@@ -31,7 +31,6 @@ int findMatchKMP(RingBuffer *haystack, Buffer *needle)
         } else {
             matchPosition = KMPTable[matchPosition];
             if (matchPosition < 0) {
-                // match was reset, 
                 ringBufferPosition++;
                 matchPosition++;
             }

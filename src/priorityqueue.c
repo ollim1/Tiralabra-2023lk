@@ -1,4 +1,4 @@
-#include "../include/queue.h"
+#include "../include/priorityqueue.h"
 #include "../include/ealloc.h"
 
 PriorityQueue *new_queue(int (*compare)(void *, void *))

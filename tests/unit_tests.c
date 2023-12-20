@@ -6,7 +6,7 @@
 #include "../include/bitarray.h"
 #include "../include/ringbuffer.h"
 #include "../include/buffer.h"
-#include "../include/queue.h"
+#include "../include/priorityqueue.h"
 
 /*
  * Tests for utility libraries
@@ -45,6 +45,23 @@ START_TEST(test_buffer_append)
 }
 END_TEST
 
+START_TEST(test_buffer_equals)
+{
+    Buffer *buf1 = new_buffer();
+    Buffer *buf2 = new_buffer();
+    char *testStr = "abcabc";
+
+    buffer_append(buf1, testStr, 7);
+    buffer_append(buf2, testStr, 7);
+    ck_assert_int_eq(buffer_equals(buf1, buf2), 1);
+    buffer_append(buf2, testStr, 7);
+    ck_assert_int_eq(buffer_equals(buf1, buf2), 0);
+
+    delete_buffer(buf1);
+    delete_buffer(buf2);
+}
+END_TEST
+
 START_TEST(test_buffer_pad)
 {
     Buffer *buf = new_buffer();
@@ -65,22 +82,6 @@ START_TEST(test_buffer_expands)
 }
 END_TEST
 
-Suite *buffer_suite(void)
-{
-    Suite *s;
-    TCase *tc_core;
-    s = suite_create("Buffer");
-    tc_core = tcase_create("Core");
-    tcase_add_test(tc_core, test_buffer_init);
-    tcase_add_test(tc_core, test_buffer_stores_string);
-    tcase_add_test(tc_core, test_buffer_append);
-    tcase_add_test(tc_core, test_buffer_pad);
-    tcase_add_test(tc_core, test_buffer_expands);
-    suite_add_tcase(s, tc_core);
-
-    return s;
-}
-
 START_TEST(test_ringbuffer_init)
 {
     RingBuffer *buf = new_ringbuffer(1000);
@@ -88,6 +89,16 @@ START_TEST(test_ringbuffer_init)
     ck_assert_ptr_nonnull(buf->data);
     ck_assert_int_eq(buf->len, 0);
     ck_assert_int_eq(buf->size, 1000);
+    delete_ringbuffer(buf);
+}
+END_TEST
+
+START_TEST(test_ringbuffer_set_get)
+{
+    RingBuffer *buf = new_ringbuffer(100);
+    ringbuffer_appendString(buf, (unsigned char *)"abcdefghijklmnopqrstvwxyz", 26);
+    ringbuffer_set(buf, 'a', 10);
+    ck_assert_int_eq(ringbuffer_get(buf, 10), 'a');
     delete_ringbuffer(buf);
 }
 END_TEST
@@ -110,6 +121,7 @@ Suite *ringbuffer_suite(void)
     s = suite_create("RingBuffer");
     tc_core = tcase_create("Core");
     tcase_add_test(tc_core, test_ringbuffer_init);
+    tcase_add_test(tc_core, test_ringbuffer_set_get);
     tcase_add_test(tc_core, test_ringbuffer_append_get);
     suite_add_tcase(s, tc_core);
 
@@ -205,6 +217,34 @@ START_TEST(test_bitarray_init)
     ck_assert_int_eq(ba->len, 0);
 
     delete_bitarray(ba);
+}
+END_TEST
+
+START_TEST(test_bitarray_copyl1)
+{
+    BitArray *a = new_bitarray_fromStringl("01011", 5);
+    BitArray *b = bitarray_copyl(a, 3);
+    BitArray *ab = new_bitarray_fromStringl("01011010", 10);
+
+    bitarray_concat(a, b);
+    ck_assert_int_eq(bitarray_equals(a, ab), 1);
+    delete_bitarray(a);
+    delete_bitarray(b);
+    delete_bitarray(ab);
+}
+END_TEST
+
+START_TEST(test_bitarray_copyl2)
+{
+    BitArray *a = new_bitarray_fromStringl("01011", 5);
+    BitArray *b = bitarray_copyl(a, 5);
+    BitArray *ab = new_bitarray_fromStringl("0101101011", 10);
+
+    bitarray_concat(a, b);
+    ck_assert_int_eq(bitarray_equals(a, ab), 1);
+    delete_bitarray(a);
+    delete_bitarray(b);
+    delete_bitarray(ab);
 }
 END_TEST
 
@@ -383,8 +423,27 @@ Suite *bitarray_suite(void)
     tcase_add_test(tc_core, test_bitarray_writeInteger);
     tcase_add_test(tc_core, test_bitarrayreader_readInteger);
     tcase_add_test(tc_core, test_bitarray_concat);
+    tcase_add_test(tc_core, test_bitarray_copyl1);
+    tcase_add_test(tc_core, test_bitarray_copyl2);
     tcase_add_test(tc_core, test_bitarray_toBuffer);
     suite_add_tcase(s, tc_core);
+    return s;
+}
+
+Suite *buffer_suite(void)
+{
+    Suite *s;
+    TCase *tc_core;
+    s = suite_create("Buffer");
+    tc_core = tcase_create("Core");
+    tcase_add_test(tc_core, test_buffer_init);
+    tcase_add_test(tc_core, test_buffer_stores_string);
+    tcase_add_test(tc_core, test_buffer_equals);
+    tcase_add_test(tc_core, test_buffer_append);
+    tcase_add_test(tc_core, test_buffer_pad);
+    tcase_add_test(tc_core, test_buffer_expands);
+    suite_add_tcase(s, tc_core);
+
     return s;
 }
 

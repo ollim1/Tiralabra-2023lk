@@ -1,6 +1,6 @@
 #include "../include/huffman.h"
 #include "../include/huffman_private.h"
-#include "../include/queue.h"
+#include "../include/priorityqueue.h"
 #include "../include/huffnode.h"
 #include "../include/bitarray.h"
 

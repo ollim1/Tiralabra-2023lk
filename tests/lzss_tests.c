@@ -7,6 +7,7 @@
 #include "../include/lzss_private.h"
 #include "../include/ringbuffer.h"
 #include "../include/bitarray.h"
+#include "../include/fileops.h"
 
 START_TEST(testFindMatchKMP1)
 {
@@ -217,24 +218,78 @@ START_TEST(testEncodeDecodeLZSSPayload3)
 }
 END_TEST
 
+START_TEST(testCompressDecompressBit1)
+{
+    Buffer *src = new_buffer();
+    Buffer *file = readFile("samples/bliss-sample.bin");
+    Buffer *compressed = lzss_compress(file);
+    Buffer *result = lzss_extract(compressed);
+    ck_assert_int_eq(buffer_equals(result, file), 1);
+    delete_buffer(file);
+    delete_buffer(compressed);
+    delete_buffer(result);
+}
+END_TEST
+
+START_TEST(testCompressDecompressBit2)
+{
+    Buffer *src = new_buffer();
+    Buffer *file = readFile("samples/loremipsum-100k.txt");
+    Buffer *compressed = lzss_compress(file);
+    Buffer *result = lzss_extract(compressed);
+    ck_assert_int_eq(buffer_equals(result, file), 1);
+    delete_buffer(file);
+    delete_buffer(compressed);
+    delete_buffer(result);
+}
+END_TEST
+
+START_TEST(testCompressDecompressBit3)
+{
+    Buffer *src = new_buffer();
+    Buffer *file = readFile("samples/ff.bin");
+    Buffer *compressed = lzss_compress(file);
+    Buffer *result = lzss_extract(compressed);
+    ck_assert_int_eq(buffer_equals(result, file), 1);
+    delete_buffer(file);
+    delete_buffer(compressed);
+    delete_buffer(result);
+}
+END_TEST
+
+Suite *lzss_common_suite(void)
+{
+    Suite *s;
+    TCase *tc_unit;
+    s = suite_create("LZSS-common");
+    tc_unit = tcase_create("Unit");
+    tcase_add_test(tc_unit, testFindMatchKMP1);
+    tcase_add_test(tc_unit, testFindMatchKMP2);
+    tcase_add_test(tc_unit, testFindMatchKMP3);
+    suite_add_tcase(s, tc_unit);
+    return s;
+}
+
 Suite *lzss_suite(void)
 {
     Suite *s;
-    TCase *tc_core;
+    TCase *tc_unit;
     s = suite_create("LZSS");
-    tc_core = tcase_create("Core");
-    tcase_add_test(tc_core, testFindMatchKMP1);
-    tcase_add_test(tc_core, testFindMatchKMP2);
-    tcase_add_test(tc_core, testFindMatchKMP3);
-    tcase_add_test(tc_core, testReadWriteToken);
-    tcase_add_test(tc_core, testWriteToken);
-    tcase_add_test(tc_core, testWriteToken2);
-    // tcase_add_test(tc_core, testEncodeLZSSPayload);
-    tcase_add_test(tc_core, testDecodeLZSSPayload);
-    tcase_add_test(tc_core, testEncodeDecodeLZSSPayload);
-    tcase_add_test(tc_core, testEncodeDecodeLZSSPayload2);
-    tcase_add_test(tc_core, testEncodeDecodeLZSSPayload3);
-    suite_add_tcase(s, tc_core);
+    tc_unit = tcase_create("Unit");
+    tcase_add_test(tc_unit, testReadWriteToken);
+    tcase_add_test(tc_unit, testWriteToken);
+    tcase_add_test(tc_unit, testWriteToken2);
+    tcase_add_test(tc_unit, testDecodeLZSSPayload);
+    tcase_add_test(tc_unit, testEncodeDecodeLZSSPayload);
+    tcase_add_test(tc_unit, testEncodeDecodeLZSSPayload2);
+    tcase_add_test(tc_unit, testEncodeDecodeLZSSPayload3);
+    TCase *tc_int = tcase_create("Integration");
+    tcase_set_timeout(tc_int, 10);
+    tcase_add_test(tc_int, testCompressDecompressBit1);
+    tcase_add_test(tc_int, testCompressDecompressBit2);
+    tcase_add_test(tc_int, testCompressDecompressBit3);
+    suite_add_tcase(s, tc_unit);
+    suite_add_tcase(s, tc_int);
 
     return s;
 }
@@ -243,11 +298,13 @@ Suite *lzss_suite(void)
 int main(void)
 {
     int number_failed;
-    Suite *lzss_s;
+    Suite *lzss_s, *lzss_common_s;
     SRunner *sr;
 
     lzss_s = lzss_suite();
-    sr = srunner_create(lzss_s);
+    lzss_common_s = lzss_common_suite();
+    sr = srunner_create(lzss_common_s);
+    srunner_add_suite(sr, lzss_s);
 
     srunner_run_all(sr, CK_VERBOSE);
     number_failed = srunner_ntests_failed(sr);
