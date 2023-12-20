@@ -13,6 +13,8 @@ jobs:
           make codecov
           ./unittest
           ./huffmantest
+          ./lzsstest
+          ./lzssbytetest
           gcov -abcfu *.gcno
       - name: Upload
         uses: codecov/codecov-action@v3
