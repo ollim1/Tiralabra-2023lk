@@ -17,8 +17,7 @@ For this, the package `check` should be installed from your distribution's packa
 
 ## Comparison of algorithms
 
-Comparison testing was done using multiple kinds of input files.
-Image files have been compressed in PNG format. Convert them to BMP for testing.
+Comparison testing was done using multiple kinds of input files, primarily plaintext and BMP as they are uncompressed and good representations of text and binary formats.
 Run `./compressor -ba <algorithm> -i <file>` to reproduce.
 
 During testing the primary metric of comparison is compression ratio of input. LZSS is a slow algorithm even optimized, so time spent compressing should not matter.

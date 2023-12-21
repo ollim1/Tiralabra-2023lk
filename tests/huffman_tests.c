@@ -6,6 +6,7 @@
 #include "../include/huffman_private.h"
 #include "../include/huffnode.h"
 #include "../include/bitarray.h"
+#include "../include/fileops.h"
 
 START_TEST(test_init_hufftree)
 {
@@ -290,23 +291,79 @@ Suite *hufftree_suite(void)
     return s;
 }
 
+START_TEST(testCompressDecompressFile1)
+{
+    Buffer *file = readFile("samples/bliss-sample.bin");
+    Buffer *compressed = huffman_compress(file);
+    Buffer *result = huffman_extract(compressed);
+    ck_assert_int_eq(buffer_equals(result, file), 1);
+    delete_buffer(file);
+    delete_buffer(compressed);
+    delete_buffer(result);
+}
+END_TEST
+
+START_TEST(testCompressDecompressFile2)
+{
+    Buffer *file = readFile("samples/linux-sample.bin");
+    Buffer *compressed = huffman_compress(file);
+    Buffer *result = huffman_extract(compressed);
+    ck_assert_int_eq(buffer_equals(result, file), 1);
+    delete_buffer(file);
+    delete_buffer(compressed);
+    delete_buffer(result);
+}
+END_TEST
+
+START_TEST(testCompressDecompressFile3)
+{
+    Buffer *file = readFile("samples/loremipsum-100k.txt");
+    Buffer *compressed = huffman_compress(file);
+    Buffer *result = huffman_extract(compressed);
+    ck_assert_int_eq(buffer_equals(result, file), 1);
+    delete_buffer(file);
+    delete_buffer(compressed);
+    delete_buffer(result);
+}
+END_TEST
+
+START_TEST(testCompressDecompressFile4)
+{
+    Buffer *file = readFile("samples/ff.bin");
+    Buffer *compressed = huffman_compress(file);
+    Buffer *result = huffman_extract(compressed);
+    ck_assert_int_eq(buffer_equals(result, file), 1);
+    delete_buffer(file);
+    delete_buffer(compressed);
+    delete_buffer(result);
+}
+END_TEST
+
 Suite *huffman_suite(void)
 {
     Suite *s;
-    TCase *tc_core;
+    TCase *tc_unit, *tc_int;
     s = suite_create("Huffman");
-    tc_core = tcase_create("Core");
-    tcase_add_test(tc_core, test_serialize_hufftree);
-    tcase_add_test(tc_core, test_deserialize_hufftree);
-    tcase_add_test(tc_core, test_buildHufftree);
-    tcase_add_test(tc_core, test_cacheHuffcodes);
-    tcase_add_test(tc_core, test_encodeHuffmanPayload);
-    tcase_add_test(tc_core, test_decodeHuffmanPayload);
-    tcase_add_test(tc_core, test_huffman_compress_decompress_1);
-    tcase_add_test(tc_core, test_huffman_compress_decompress_2);
-    tcase_add_test(tc_core, test_huffman_compress_decompress_3);
-    tcase_add_test(tc_core, test_huffman_compress_decompress_4);
-    suite_add_tcase(s, tc_core);
+    tc_unit = tcase_create("Unit");
+    tcase_add_test(tc_unit, test_serialize_hufftree);
+    tcase_add_test(tc_unit, test_deserialize_hufftree);
+    tcase_add_test(tc_unit, test_buildHufftree);
+    tcase_add_test(tc_unit, test_cacheHuffcodes);
+    tcase_add_test(tc_unit, test_encodeHuffmanPayload);
+    tcase_add_test(tc_unit, test_decodeHuffmanPayload);
+    tc_int = tcase_create("Integration");
+    suite_add_tcase(s, tc_int);
+    tcase_set_timeout(tc_int, 10);
+    tcase_add_test(tc_int, test_huffman_compress_decompress_1);
+    tcase_add_test(tc_int, test_huffman_compress_decompress_2);
+    tcase_add_test(tc_int, test_huffman_compress_decompress_3);
+    tcase_add_test(tc_int, test_huffman_compress_decompress_4);
+    tcase_add_test(tc_int, testCompressDecompressFile1);
+    tcase_add_test(tc_int, testCompressDecompressFile2);
+    tcase_add_test(tc_int, testCompressDecompressFile3);
+    tcase_add_test(tc_int, testCompressDecompressFile4);
+    suite_add_tcase(s, tc_unit);
+    suite_add_tcase(s, tc_int);
 
     return s;
 }

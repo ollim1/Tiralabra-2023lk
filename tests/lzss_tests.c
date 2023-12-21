@@ -220,7 +220,6 @@ END_TEST
 
 START_TEST(testCompressDecompressBit1)
 {
-    Buffer *src = new_buffer();
     Buffer *file = readFile("samples/bliss-sample.bin");
     Buffer *compressed = lzss_compress(file);
     Buffer *result = lzss_extract(compressed);
@@ -233,8 +232,7 @@ END_TEST
 
 START_TEST(testCompressDecompressBit2)
 {
-    Buffer *src = new_buffer();
-    Buffer *file = readFile("samples/loremipsum-100k.txt");
+    Buffer *file = readFile("samples/linux-sample.bin");
     Buffer *compressed = lzss_compress(file);
     Buffer *result = lzss_extract(compressed);
     ck_assert_int_eq(buffer_equals(result, file), 1);
@@ -246,7 +244,18 @@ END_TEST
 
 START_TEST(testCompressDecompressBit3)
 {
-    Buffer *src = new_buffer();
+    Buffer *file = readFile("samples/loremipsum-100k.txt");
+    Buffer *compressed = lzss_compress(file);
+    Buffer *result = lzss_extract(compressed);
+    ck_assert_int_eq(buffer_equals(result, file), 1);
+    delete_buffer(file);
+    delete_buffer(compressed);
+    delete_buffer(result);
+}
+END_TEST
+
+START_TEST(testCompressDecompressBit4)
+{
     Buffer *file = readFile("samples/ff.bin");
     Buffer *compressed = lzss_compress(file);
     Buffer *result = lzss_extract(compressed);
@@ -288,6 +297,7 @@ Suite *lzss_suite(void)
     tcase_add_test(tc_int, testCompressDecompressBit1);
     tcase_add_test(tc_int, testCompressDecompressBit2);
     tcase_add_test(tc_int, testCompressDecompressBit3);
+    tcase_add_test(tc_int, testCompressDecompressBit4);
     suite_add_tcase(s, tc_unit);
     suite_add_tcase(s, tc_int);
 
